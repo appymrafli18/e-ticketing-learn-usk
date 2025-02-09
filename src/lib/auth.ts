@@ -16,7 +16,9 @@ export function generateToken(payload: IPayload) {
 
 export function verifyToken(token: string): IPayload | null {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET!) as IPayload;
+    const tox = jwt.verify(token, process.env.JWT_SECRET!) as IPayload;
+    console.log({ tox });
+    return tox;
   } catch (error: unknown) {
     return error instanceof Error ? null : null;
   }

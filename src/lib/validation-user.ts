@@ -1,6 +1,7 @@
+import { LOGIN, REGISTER } from "@/types/user";
 import { z } from "zod";
 
-export const userSchema = z
+export const userSchema: z.ZodType<REGISTER> = z
   .object({
     name: z.string().min(4, "Nama minimal 4 karakter"),
     username: z.string().min(4, "Username minimal 4 karakter"),
@@ -18,4 +19,10 @@ export const userSchema = z
     path: ["confirmPassword"],
   });
 
+export const loginSchema: z.ZodType<LOGIN> = z.object({
+  email: z.string().email("Format Email tidak Valid"),
+  password: z.string(),
+});
 
+export type LoginForm = z.infer<typeof loginSchema>;
+export type RegisterForm = z.infer<typeof userSchema>;

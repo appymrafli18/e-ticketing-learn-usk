@@ -7,6 +7,7 @@ import { prisma_connection } from "@/lib/prisma-orm";
 import { cookies } from "next/headers";
 import { IPayload } from "@/types/jwt";
 import { generateToken, hashPassword, verifyPassword } from "@/lib/auth";
+import { Role } from "@prisma/client";
 
 export const userServices = {
   registerUser: async (req: Request) => {
@@ -54,12 +55,14 @@ export const userServices = {
         },
       });
 
-      if (!findUser) return createResponse(404, "User not found");
+      if (!findUser) return createResponse(404, "Akun tidak terdaftar");
       const unhashing = await verifyPassword(body.password, findUser.password);
       if (!unhashing) return createResponse(401, "Password Salah");
 
       const payload: IPayload = {
         id: findUser.id,
+        username: findUser.username,
+        name: findUser.name,
         email: findUser.email,
         role: findUser.role,
       };
@@ -101,10 +104,13 @@ export const userServices = {
       );
     }
   },
-  getAllUser: async (payload: IPayload) => {
+  getAllUser: async (payload: IPayload, role: Role) => {
     if (payload.role !== "ADMIN") return createResponse(401, "Unauthorized");
     try {
       const user = await prisma_connection.tbl_user.findMany({
+        where: {
+          role: role,
+        },
         select: {
           id: true,
           uuid: true,
@@ -144,6 +150,29 @@ export const userServices = {
       return createResponse(400, (error as Error).message);
     }
   },
+  getMeUser: async (payload: IPayload, token: string) => {
+    try {
+      const response = await prisma_connection.tbl_user.findUnique({
+        where: {
+          id: payload.id,
+        },
+        select: {
+          id: true,
+          uuid: true,
+          username: true,
+          name: true,
+          role: true,
+          email: true,
+        },
+      });
+
+      if (!response) return createResponse(404, "User not found");
+
+      return createResponse(200, "Success", { ...response, token });
+    } catch (error) {
+      return createResponse(400, (error as Error).message);
+    }
+  },
   updateUser: async (req: Request, uuid: string, payload: IPayload) => {
     try {
       const body = await req.json();
@@ -156,7 +185,9 @@ export const userServices = {
 
       if (!search) return createResponse(404, "User not found");
 
-      const changePass = body.password ? await hashPassword(body.password) : search.password;
+      const changePass = body.password
+        ? await hashPassword(body.password)
+        : search.password;
 
       if (payload.role === "ADMIN") {
         const newRole = body.role ?? search.role;
@@ -183,7 +214,7 @@ export const userServices = {
           data: {
             name: body.name || search.name,
             email: body.email || search.email,
-            password: changePass
+            password: changePass,
           },
         });
       }
