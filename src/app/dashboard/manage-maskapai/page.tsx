@@ -6,6 +6,7 @@ import { USER } from "@/types/user";
 import axios from "axios";
 import { ErrorAxios } from "@/lib/axios-error";
 import EditUser from "@/components/modal/EditUser";
+import toast, { Toaster } from "react-hot-toast";
 const Page: React.FC = () => {
   const [users, setUsers] = useState<USER[] | null>(null);
   const [selectedUser, setSelectedUser] = useState<USER | null>(null);
@@ -47,8 +48,11 @@ const Page: React.FC = () => {
       );
 
       if (response.status === 200) {
-        setIsOpen(false);
-        window.location.reload();
+        toast.success("Berhasil Mengubah Data Maskapai");
+        setTimeout(() => {
+          setIsOpen(false);
+          window.location.reload();
+        }, 1500);
       }
     } catch (error) {
       const err = ErrorAxios(error);
@@ -71,6 +75,9 @@ const Page: React.FC = () => {
         <div className="mb-6"></div>
 
         <UserTable users={users} loading={loading} onEdit={onEdit} />
+        <div>
+          <Toaster position="top-right" reverseOrder={false} />
+        </div>
         {isOpen && (
           <EditUser
             isOpen={isOpen}

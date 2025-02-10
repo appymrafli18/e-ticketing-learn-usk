@@ -6,13 +6,14 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import toast, { Toaster } from "react-hot-toast";
 
 const Page = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isLoading },
   } = useForm<RegisterForm>({
     resolver: zodResolver(userSchema),
   });
@@ -23,7 +24,12 @@ const Page = () => {
 
     try {
       const response = await axios.post("/api/auth/register", data);
-      if (response.status === 200) return (window.location.href = "/dashboard");
+      if (response.status === 201) {
+        toast.success("Berhasil Login");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1500);
+      }
       console.log("BERHASIL LOGIN", response);
     } catch (error) {
       const err = ErrorAxios(error);
@@ -123,7 +129,7 @@ const Page = () => {
             <div className="hidden">{errorMessage}</div>
 
             <button
-              disabled={isSubmitting}
+              disabled={isLoading}
               className={`w-full text-white font-medium py-2.5 rounded-lg transition-colors ${
                 isSubmitting
                   ? "bg-indigo-300"
@@ -142,6 +148,10 @@ const Page = () => {
             >
               Sign In
             </Link>
+          </div>
+
+          <div>
+            <Toaster position="top-right" reverseOrder={false} />
           </div>
         </div>
       </div>
