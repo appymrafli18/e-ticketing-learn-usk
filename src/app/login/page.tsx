@@ -80,12 +80,12 @@ const Page = () => {
                 />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
-              <a
-                href="#"
+              <Link
+                href=""
                 className="text-sm text-indigo-600 hover:text-indigo-500"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <button
