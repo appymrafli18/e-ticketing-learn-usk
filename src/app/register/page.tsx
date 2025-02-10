@@ -120,6 +120,7 @@ const Page = () => {
                 </p>
               )}
             </div>
+            <div className="hidden">{errorMessage}</div>
 
             <button
               disabled={isSubmitting}
