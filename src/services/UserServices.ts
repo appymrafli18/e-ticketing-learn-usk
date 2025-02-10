@@ -173,6 +173,16 @@ export const userServices = {
       return createResponse(400, (error as Error).message);
     }
   },
+  getTotalUser: async (payload: IPayload) => {
+    if (payload.role !== "ADMIN") return createResponse(401, "Unauthorized");
+    try {
+      const response = await prisma_connection.tbl_user.count();
+      if (!response) return createResponse(404, "Not Have User");
+      return createResponse(200, "Success", response);
+    } catch (error) {
+      return createResponse(400, (error as Error).message);
+    }
+  },
   updateUser: async (req: Request, uuid: string, payload: IPayload) => {
     try {
       const body = await req.json();

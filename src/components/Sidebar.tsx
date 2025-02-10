@@ -13,7 +13,7 @@ const Sidebar: React.FC = () => {
             href="/dashboard"
             className="text-[var(--text-sidebar)] hover:text-[var(--text-sidebar-hover)] block p-2 rounded"
           >
-            Dashboard
+            Home
           </Link>
         </li>
         <li className="mb-3">

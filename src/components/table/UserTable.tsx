@@ -3,11 +3,12 @@ import React from "react";
 
 interface UserTableProps {
   users: USER[] | null;
-  // onEdit: (user: User) => void;
+  loading: boolean;
+  onEdit: (selectUser: USER) => void;
   // onDelete?: (id: number) => void;
 }
 
-const UserTable: React.FC<UserTableProps> = ({ users }) => {
+const UserTable: React.FC<UserTableProps> = ({ users, loading, onEdit }) => {
   return (
     <div className="overflow-x-auto card">
       <table className="min-w-full shadow-md rounded-lg text-center">
@@ -30,7 +31,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                 <td className="py-2 px-4">{user.role}</td>
                 <td className="py-2 px-4">
                   <button
-                    onClick={() => {}}
+                    onClick={() => onEdit(user)}
                     className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-600"
                   >
                     Edit
@@ -46,6 +47,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
             ))}
         </tbody>
       </table>
+      {loading && <div className="text-center">Loading...</div>}
     </div>
   );
 };

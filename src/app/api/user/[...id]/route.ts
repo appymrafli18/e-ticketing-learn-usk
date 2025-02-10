@@ -25,6 +25,8 @@ export async function GET(
       return userServices.getMeUser(verif, getToken);
     case "select":
       return userServices.getOneUser(verif, id[1]);
+     case "count":
+      return userServices.getTotalUser(verif);
     default:
       return createResponse(404, "Not Found");
   }
