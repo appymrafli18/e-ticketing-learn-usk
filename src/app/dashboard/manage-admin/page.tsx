@@ -23,7 +23,7 @@ const Page: React.FC = () => {
       if (response.status === 200 && response.data.data.length !== 0) {
         setUsers(response.data.data);
       } else {
-        setErrorMessage("Tidak memiliki data user");
+        setErrorMessage("Tidak memiliki data Admin");
       }
     } catch (error) {
       const err = ErrorAxios(error);

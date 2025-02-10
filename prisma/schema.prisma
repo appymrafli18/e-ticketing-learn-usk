@@ -28,5 +28,5 @@ model tbl_user {
   password String @db.VarChar(255)
   role Role @default(USER)
   createdAt DateTime @default(now())
-  updated_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

@@ -150,7 +150,7 @@ export const userServices = {
       return createResponse(400, (error as Error).message);
     }
   },
-  getMeUser: async (payload: IPayload, token: string) => {
+  getMeUser: async (payload: IPayload) => {
     try {
       const response = await prisma_connection.tbl_user.findUnique({
         where: {
@@ -168,7 +168,7 @@ export const userServices = {
 
       if (!response) return createResponse(404, "User not found");
 
-      return createResponse(200, "Success", { ...response, token });
+      return createResponse(200, "Success", response);
     } catch (error) {
       return createResponse(400, (error as Error).message);
     }

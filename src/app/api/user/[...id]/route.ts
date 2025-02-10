@@ -22,10 +22,10 @@ export async function GET(
         return userServices.getAllUser(verif, id[1].toUpperCase() as Role);
       return createResponse(400, "Role yang di berikan tidak valid");
     case "me":
-      return userServices.getMeUser(verif, getToken);
+      return userServices.getMeUser(verif);
     case "select":
       return userServices.getOneUser(verif, id[1]);
-     case "count":
+    case "count":
       return userServices.getTotalUser(verif);
     default:
       return createResponse(404, "Not Found");
