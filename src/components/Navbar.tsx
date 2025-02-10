@@ -1,5 +1,5 @@
 "use client";
-import ErrorAxios from "@/lib/axios-error";
+import { ErrorAxios } from "@/lib/axios-error";
 import axios from "axios";
 import React from "react";
 
