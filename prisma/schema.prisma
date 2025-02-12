@@ -44,4 +44,25 @@ model tbl_airlines {
 
   // relasi one-to-one dengan tbl_user
   user tbl_user @relation(fields: [userId], references: [id])
+
+  // relasi one-to-many dengan tbl_flights
+  flights tbl_flights[]
+}
+
+model tbl_flights {
+  id Int @id @default(autoincrement())
+  no_penerbangan String
+  kota_keberangkatan String
+  kota_tujuan String
+  waktu_keberangkatan DateTime
+  waktu_kedatangan DateTime
+  harga Decimal @db.Decimal(10, 2)
+  kapasitas_kursi Int
+  kursi_tersedia Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relasi one-to-many dengan tbl_airlines
+  airlinesId Int
+  airlines tbl_airlines @relation(fields: [airlinesId], references: [id])
 }

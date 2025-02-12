@@ -184,6 +184,7 @@ export const userServices = {
     }
   },
   updateUser: async (req: Request, uuid: string, payload: IPayload) => {
+    if (payload.role !== "ADMIN") return createResponse(401, "Unauthorized");
     try {
       const body = await req.json();
 

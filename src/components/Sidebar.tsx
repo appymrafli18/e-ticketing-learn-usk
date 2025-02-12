@@ -18,8 +18,8 @@ const listSidebar = [
     protect: false,
   },
   {
-    url: "/dashboard/manage-flights",
-    title: "Manage Flights",
+    url: "/dashboard/manage-airlines",
+    title: "Manage Airlines",
     protect: false,
   },
   {
