@@ -1,6 +1,6 @@
 "use client";
 import LayoutDashboard from "@/components/LayoutDashboard";
-import EditFlights from "@/components/modal/EditFlights";
+import EditFlights from "@/components/modal/EditAirlines";
 import AirlinesTable from "@/components/table/AirlinesTable";
 import { ErrorAxios } from "@/lib/axios-error";
 import { IAirlines, IAirlinesAPI } from "@/types/airlines";
