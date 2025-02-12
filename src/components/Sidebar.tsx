@@ -1,6 +1,39 @@
 import React from "react";
 import Link from "next/link";
 
+const listSidebar = [
+  {
+    url: "/dashboard",
+    title: "Home",
+    protect: false,
+  },
+  {
+    url: "/dashboard/manage-users",
+    title: "Manage Users",
+    protect: false,
+  },
+  {
+    url: "/dashboard/manage-maskapai",
+    title: "Manage Maskapai",
+    protect: false,
+  },
+  {
+    url: "/dashboard/manage-flights",
+    title: "Manage Flights",
+    protect: false,
+  },
+  {
+    url: "/dashboard/manage-admin",
+    title: "Manage Admin",
+    protect: false,
+  },
+  {
+    url: "/dashboard/admin-reports",
+    title: "Reports",
+    protect: false,
+  },
+];
+
 const Sidebar: React.FC = () => {
   return (
     <div className="w-64 min-h-screen p-4 bg-[var(--foreground)]">
@@ -8,54 +41,16 @@ const Sidebar: React.FC = () => {
         E-Ticketing Admin
       </h1>
       <ul>
-        <li className="mb-3">
-          <Link
-            href="/dashboard"
-            className="text-[var(--text-sidebar)] hover:text-[var(--text-sidebar-hover)] block p-2 rounded"
-          >
-            Home
-          </Link>
-        </li>
-        <li className="mb-3">
-          <Link
-            href="/dashboard/manage-users"
-            className="text-[var(--text-sidebar)] hover:text-[var(--text-sidebar-hover)] block p-2 rounded"
-          >
-            Manage Users
-          </Link>
-        </li>
-        <li className="mb-3">
-          <Link
-            href="/dashboard/manage-maskapai"
-            className="text-[var(--text-sidebar)] hover:text-[var(--text-sidebar-hover)] block p-2 rounded"
-          >
-            Manage Maskapai
-          </Link>
-        </li>
-        <li className="mb-3">
-          <Link
-            href="/admin/flights"
-            className="text-[var(--text-sidebar)] hover:text-[var(--text-sidebar-hover)] block p-2 rounded"
-          >
-            Manage Flights
-          </Link>
-        </li>
-        <li className="mb-3">
-          <Link
-            href="/dashboard/manage-admin"
-            className="text-[var(--text-sidebar)] hover:text-[var(--text-sidebar-hover)] block p-2 rounded"
-          >
-            Manage Admin
-          </Link>
-        </li>
-        <li className="mb-3">
-          <Link
-            href="/admin/reports"
-            className="text-[var(--text-sidebar)] hover:text-[var(--text-sidebar-hover)] block p-2 rounded"
-          >
-            Reports
-          </Link>
-        </li>
+        {listSidebar.map((values, index) => (
+          <li className={`mb-3 ${values.protect ? "hidden" : ""}`} key={index}>
+            <Link
+              href={values.url}
+              className="text-[var(--text-sidebar)] hover:text-[var(--text-sidebar-hover)] block p-2 rounded"
+            >
+              {values.title}
+            </Link>
+          </li>
+        ))}
       </ul>
     </div>
   );

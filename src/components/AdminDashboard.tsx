@@ -43,7 +43,7 @@ const AdminDashboard: React.FC = () => {
       </div>
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4">Recent Activities</h3>
-        <div className="bg-[var(--foreground)] p-6 rounded-lg shadow-md">
+        <div className="dark:bg-[var(--foreground)] p-6 rounded-lg shadow-md">
           <ul>
             <li className="border-b py-2">User John Doe booked a flight.</li>
             <li className="border-b py-2">Flight XYZ123 was added.</li>

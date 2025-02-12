@@ -15,7 +15,7 @@ export async function middleware(req: NextRequest) {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(getToken, secret);
 
-    if (payload.role !== "ADMIN")
+    if (payload.role === "USER")
       return NextResponse.redirect(new URL("/", req.url));
     return null;
   }
@@ -30,5 +30,10 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/user/:path*", "/dashboard/:path*", "/login"],
+  matcher: [
+    "/api/user/:path*",
+    "/dashboard/:path*",
+    "/login",
+    "/api/airlines/:path*",
+  ],
 };

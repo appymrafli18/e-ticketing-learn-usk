@@ -28,5 +28,20 @@ model tbl_user {
   password String @db.VarChar(255)
   role Role @default(USER)
   createdAt DateTime @default(now())
-  updated_at DateTime @updatedAt
+  updatedAt DateTime @updatedAt
+
+  // relasi one-to-one dengan tbl_airlines
+  airlines tbl_airlines?
+}
+
+model tbl_airlines {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(100)
+  logo String @db.VarChar(255)
+  userId Int @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relasi one-to-one dengan tbl_user
+  user tbl_user @relation(fields: [userId], references: [id])
 }
