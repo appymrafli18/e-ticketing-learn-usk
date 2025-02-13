@@ -1,9 +1,8 @@
 import { verifyToken } from "@/lib/auth";
 import { createResponse } from "@/lib/response";
-import { userServices } from "@/services/UserServices";
+import { BookingServices } from "@/services/BookingServices";
 import { IPayload } from "@/types/jwt";
 import { IParamsServer } from "@/types/params-server";
-import { Role } from "@prisma/client";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -18,13 +17,26 @@ export async function GET(
 
   switch (id[0]) {
     case "all":
-      return userServices.getAllUser(verif, id[1].toUpperCase() as Role);
-    case "me":
-      return userServices.getMeUser(verif);
+      return BookingServices.getAllBookings(verif);
     case "select":
-      return userServices.getOneUser(verif, id[1]);
-    case "count":
-      return userServices.getTotalUser(verif);
+      return BookingServices.getOneBooking(id[1], verif);
+    default:
+      return createResponse(404, "Not Found");
+  }
+}
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<IParamsServer> }
+) {
+  const getToken = req.cookies.get("token")!.value;
+  const verif: IPayload | null = verifyToken(getToken);
+  const { id } = await params;
+
+  if (!verif) return createResponse(401, "Failed Token");
+
+  switch (id[0]) {
+    case "create":
+      return BookingServices.createBookings(req, verif);
     default:
       return createResponse(404, "Not Found");
   }
@@ -38,16 +50,15 @@ export async function PUT(
   const verif: IPayload | null = verifyToken(getToken);
   const { id } = await params;
 
-  if (!verif) return createResponse(401, "Not Found Token!");
+  if (!verif) return createResponse(401, "Failed Token");
 
   switch (id[0]) {
     case "update":
-      return userServices.updateUser(req, id[1], verif);
+      return BookingServices.updateBookings(req, id[1], verif);
     default:
       return createResponse(404, "Not Found");
   }
 }
-
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<IParamsServer> }
@@ -56,11 +67,11 @@ export async function DELETE(
   const verif: IPayload | null = verifyToken(getToken);
   const { id } = await params;
 
-  if (!verif) return createResponse(401, "Not Found Token!");
+  if (!verif) return createResponse(401, "Failed Token");
 
   switch (id[0]) {
     case "delete":
-      return userServices.deleteUser(verif, id[1]);
+      return BookingServices.deleteBookings(id[1], verif);
     default:
       return createResponse(404, "Not Found");
   }

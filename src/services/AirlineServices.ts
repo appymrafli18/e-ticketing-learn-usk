@@ -7,21 +7,21 @@ import { promises as fs } from "fs";
 
 export const airlineService = {
   getAllAirlines: async (payload: IPayload) => {
-    if (payload.role === "USER") return createResponse(401, "Unauthorized");
+    // if (payload.role === "USER") return createResponse(401, "Unauthorized");
     try {
-      const userId = payload.role === "MASKAPAI" ? payload.id : undefined;
       const response = await prisma_connection.tbl_airlines.findMany({
         where: {
-          userId,
+          ...(payload.role === "MASKAPAI" && { userId: payload.id }),
+        },
+        omit: {
+          userId: true,
         },
         include: {
           user: {
-            select: {
-              id: true,
-              uuid: true,
-              username: true,
-              name: true,
-              email: true,
+            omit: {
+              password: true,
+              createdAt: true,
+              updatedAt: true,
             },
           },
         },
@@ -35,23 +35,22 @@ export const airlineService = {
     }
   },
   getSelectedAirlines: async (payload: IPayload, id: string) => {
-    if (payload.role === "USER") return createResponse(401, "Unauthorized");
+    // if (payload.role === "USER") return createResponse(401, "Unauthorized");
     try {
-      const userId = payload.role === "MASKAPAI" ? payload.id : undefined;
-
       const response = await prisma_connection.tbl_airlines.findUnique({
         where: {
           id: Number(id),
-          userId,
+          ...(payload.role === "MASKAPAI" && { userId: payload.id }),
+        },
+        omit: {
+          userId: true,
         },
         include: {
           user: {
-            select: {
-              id: true,
-              uuid: true,
-              username: true,
-              name: true,
-              email: true,
+            omit: {
+              password: true,
+              createdAt: true,
+              updatedAt: true,
             },
           },
         },
@@ -142,7 +141,7 @@ export const airlineService = {
     }
   },
   deleteAirlines: async (payload: IPayload, id: string) => {
-    if (payload.role === "USER") return createResponse(401, "Unauthorized");
+    if (payload.role !== "ADMIN") return createResponse(401, "Unauthorized");
     try {
       const search = await prisma_connection.tbl_airlines.findUnique({
         where: {

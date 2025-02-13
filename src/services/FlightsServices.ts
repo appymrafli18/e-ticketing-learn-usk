@@ -6,35 +6,32 @@ import { NextRequest } from "next/server";
 export const FlightsServices = {
   getAllFlight: async (payload: IPayload) => {
     try {
-      let response;
       const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
         where: {
           userId: payload.id,
         },
       });
-      if (payload.role === "MASKAPAI") {
-        response = await prisma_connection.tbl_flights.findMany({
-          where: {
+
+      if (!searchAirlines && payload.role === "MASKAPAI")
+        return createResponse(404, "Airlines not found");
+
+      const response = await prisma_connection.tbl_flights.findMany({
+        where: {
+          ...(payload.role === "MASKAPAI" && {
             airlinesId: searchAirlines?.id,
-          },
-          omit: {
-            airlinesId: true,
-          },
-          include: {
-            airlines: {
-              omit: {
-                userId: true,
-              },
+          }),
+        },
+        omit: {
+          airlinesId: true,
+        },
+        include: {
+          airlines: {
+            omit: {
+              userId: true,
             },
           },
-        });
-      } else {
-        response = await prisma_connection.tbl_flights.findMany({
-          include: {
-            airlines: true,
-          },
-        });
-      }
+        },
+      });
 
       return createResponse(200, "Success", response);
     } catch (error) {
@@ -43,42 +40,35 @@ export const FlightsServices = {
   },
   getFlightById: async (id: string, payload: IPayload) => {
     try {
-      let response;
       const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
         where: {
           userId: payload.id,
-          id: Number(id),
         },
       });
-      if (!searchAirlines) return createResponse(404, "Airlines Not Found");
 
-      if (payload.role === "MASKAPAI") {
-        response = await prisma_connection.tbl_flights.findUnique({
-          where: {
-            airlinesId: searchAirlines.id,
-            id: Number(id),
-          },
-          omit: {
-            airlinesId: true,
-          },
-          include: {
-            airlines: {
-              omit: {
-                userId: true,
-              },
+      if (!searchAirlines && payload.role === "MASKAPAI")
+        return createResponse(404, "Airlines not found");
+
+      const response = await prisma_connection.tbl_flights.findUnique({
+        where: {
+          ...(payload.role === "MASKAPAI" && {
+            airlinesId: searchAirlines?.id,
+          }),
+          id: Number(id),
+        },
+        omit: {
+          airlinesId: true,
+        },
+        include: {
+          airlines: {
+            omit: {
+              userId: true,
             },
           },
-        });
-      } else {
-        response = await prisma_connection.tbl_flights.findUnique({
-          where: {
-            id: Number(id),
-          },
-          include: {
-            airlines: true,
-          },
-        });
-      }
+        },
+      });
+
+      if (!response) return createResponse(404, "Not Found Flights");
 
       return createResponse(200, "Success", response);
     } catch (error) {
@@ -96,7 +86,6 @@ export const FlightsServices = {
       });
 
       if (!searchAirlines) return createResponse(404, "Airlines not found");
-      console.log(searchAirlines);
 
       const flightsData = {
         ...body,
@@ -125,47 +114,33 @@ export const FlightsServices = {
         },
       });
 
-      if (!searchAirlines) return createResponse(404, "Airlines not found");
+      if (!searchAirlines && payload.role === "MASKAPAI")
+        return createResponse(404, "Airlines not found");
 
       const flightsData = {
         ...body,
         harga: Number(body.harga),
         kapasitas_kursi: Number(body.kapasitas_kursi),
         kursi_tersedia: Number(body.kursi_tersedia),
-        airlinesId: searchAirlines.id,
       };
 
-      if (payload.role === "ADMIN") {
-        const searchFlights = await prisma_connection.tbl_flights.findUnique({
-          where: {
-            id: Number(id),
-          },
-        });
+      const searchFlights = await prisma_connection.tbl_flights.findUnique({
+        where: {
+          id: Number(id),
+          ...(payload.role === "MASKAPAI" && {
+            airlinesId: searchAirlines?.id,
+          }),
+        },
+      });
 
-        if (!searchFlights) return createResponse(404, "Not Found Flights");
+      if (!searchFlights) return createResponse(404, "Not Found Flights");
 
-        await prisma_connection.tbl_flights.update({
-          data: flightsData,
-          where: {
-            id: searchFlights.id,
-          },
-        });
-      } else {
-        const searchFlights = await prisma_connection.tbl_flights.findUnique({
-          where: {
-            id: Number(id),
-            airlinesId: searchAirlines.id,
-          },
-        });
-
-        if (!searchFlights) return createResponse(404, "Not Found Flights");
-        await prisma_connection.tbl_flights.update({
-          data: flightsData,
-          where: {
-            id: searchFlights.id,
-          },
-        });
-      }
+      await prisma_connection.tbl_flights.update({
+        data: flightsData,
+        where: {
+          id: searchFlights.id,
+        },
+      });
 
       return createResponse(200, "Success updated Flights");
     } catch (error) {
@@ -175,31 +150,33 @@ export const FlightsServices = {
   deleteFlight: async (id: string, payload: IPayload) => {
     if (payload.role === "USER") return createResponse(404, "Unauthorized");
     try {
-      let response;
       const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
         where: {
           userId: payload.id,
-          id: Number(id),
         },
       });
-      if (!searchAirlines) return createResponse(404, "Airlines Not Found");
 
-      if (payload.role === "MASKAPAI") {
-        response = await prisma_connection.tbl_flights.delete({
-          where: {
-            airlinesId: searchAirlines.id,
-            id: Number(id),
-          },
-        });
-      } else {
-        response = await prisma_connection.tbl_flights.delete({
-          where: {
-            id: Number(id),
-          },
-        });
-      }
+      if (!searchAirlines && payload.role === "MASKAPAI")
+        return createResponse(404, "Airlines not found");
 
-      return createResponse(200, "Success Deleted Flights", response);
+      const searchFlights = await prisma_connection.tbl_flights.findUnique({
+        where: {
+          id: Number(id),
+          ...(payload.role === "MASKAPAI" && {
+            airlinesId: searchAirlines?.id,
+          }),
+        },
+      });
+
+      if (!searchFlights) return createResponse(404, "Not Found Flights");
+
+      await prisma_connection.tbl_flights.delete({
+        where: {
+          id: searchFlights.id,
+        },
+      });
+
+      return createResponse(200, "Success Deleted Flights");
     } catch (error) {
       return createResponse(400, (error as Error).message);
     }

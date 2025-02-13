@@ -19,6 +19,12 @@ enum Role {
   MASKAPAI
 }
 
+enum Status {
+  Pending
+  Confirmed
+  Canceled
+}
+
 model tbl_user {
   id Int @id @default(autoincrement())
   uuid String @unique @default(uuid())
@@ -32,6 +38,12 @@ model tbl_user {
 
   // relasi one-to-one dengan tbl_airlines
   airlines tbl_airlines?
+
+  // relasi one-to-many
+  bookings tbl_bookings[]
+
+  // relasi one-to-many
+  notifications tbl_notifications[]
 }
 
 model tbl_airlines {
@@ -45,7 +57,7 @@ model tbl_airlines {
   // relasi one-to-one dengan tbl_user
   user tbl_user @relation(fields: [userId], references: [id])
 
-  // relasi one-to-many dengan tbl_flights
+  // relasi one-to-many dengan tbl_flights = 1 airlines dapat memiliki banyak flights
   flights tbl_flights[]
 }
 
@@ -62,7 +74,54 @@ model tbl_flights {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // relasi one-to-many dengan tbl_bookings
+  bookings tbl_bookings[]
+
   // relasi one-to-many dengan tbl_airlines
   airlinesId Int
   airlines tbl_airlines @relation(fields: [airlinesId], references: [id])
+}
+
+model tbl_bookings {
+  id Int @id @default(autoincrement())
+  jumlah_kursi Int
+  total_harga Decimal @db.Decimal(10, 2)
+  status Status @default(Pending)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // one-to-one dengan tbl_bookings
+  payments tbl_payments?
+
+  // relasi one-to-many dengan tbl_flights
+  flightId Int
+  flight tbl_flights @relation(fields: [flightId], references: [id])
+
+  // relasi one-to-many dengan tbl_user
+  userId Int
+  user tbl_user @relation(fields: [userId], references: [id])
+}
+
+model tbl_payments {
+  id String @id @default(uuid())
+  payment_method String
+  jumlah_pembayaran Decimal @db.Decimal(10, 2)
+  status Status @default(Pending)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relasi one-to-one dengan tbl_bookings
+  bookingId Int @unique
+  booking tbl_bookings @relation(fields: [bookingId], references: [id])
+}
+
+model tbl_notifications {
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  message String
+  isRead Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  // relasi one-to-many
+  user tbl_user @relation(fields: [userId], references: [id])
 }

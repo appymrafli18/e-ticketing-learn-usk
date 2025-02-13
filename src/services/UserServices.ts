@@ -14,23 +14,23 @@ export const userServices = {
     try {
       const body: REGISTER = await req.json();
 
-      const result = userSchema.safeParse(body);
+      const { error, data } = userSchema.safeParse(body);
 
-      if (!result.success)
+      if (error)
         return createResponse(
           400,
           "Validation Error",
           undefined,
-          converterError(result.error)
+          converterError(error)
         );
 
-      const hashing = await argon2d.hash(result.data.password);
+      const hashing = await argon2d.hash(data.password);
 
       await prisma_connection.tbl_user.create({
         data: {
-          name: result.data.name,
-          username: result.data.username,
-          email: result.data.email,
+          name: data.name,
+          username: data.username,
+          email: data.email,
           password: hashing,
         },
       });
@@ -47,17 +47,17 @@ export const userServices = {
   },
   loginUser: async (req: Request) => {
     try {
-      const body: LOGIN = await req.json();
+      const { email, password }: LOGIN = await req.json();
 
       const findUser = await prisma_connection.tbl_user.findUnique({
         where: {
-          email: body.email,
+          email,
         },
       });
 
       if (!findUser) return createResponse(404, "Akun tidak terdaftar");
-      const unhashing = await verifyPassword(body.password, findUser.password);
-      if (!unhashing) return createResponse(401, "Password Salah");
+      if (!(await verifyPassword(password, findUser.password)))
+        return createResponse(401, "Password Salah");
 
       const payload: IPayload = {
         id: findUser.id,
@@ -93,7 +93,6 @@ export const userServices = {
     try {
       const cookiesStore = await cookies();
       cookiesStore.delete("token");
-
       return createResponse(200, "Logout Success");
     } catch (error) {
       return createResponse(
@@ -107,19 +106,20 @@ export const userServices = {
   getAllUser: async (payload: IPayload, role: Role) => {
     if (payload.role !== "ADMIN") return createResponse(401, "Unauthorized");
     try {
+      if (!["ADMIN", "USER", "MASKAPAI"].includes(role?.toUpperCase()))
+        return createResponse(400, "Role yang di berikan tidak valid");
       const user = await prisma_connection.tbl_user.findMany({
         where: {
-          role: role,
+          role,
         },
-        select: {
-          id: true,
-          uuid: true,
-          username: true,
-          name: true,
-          role: true,
-          email: true,
+        omit: {
+          password: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
+
+      if (!user) return createResponse(404, "Invalid Selected User");
 
       return createResponse(200, "Success", user);
     } catch (error) {
@@ -133,13 +133,10 @@ export const userServices = {
         where: {
           uuid: params,
         },
-        select: {
-          id: true,
-          uuid: true,
-          username: true,
-          name: true,
-          role: true,
-          email: true,
+        omit: {
+          password: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
 
@@ -156,13 +153,10 @@ export const userServices = {
         where: {
           id: payload.id,
         },
-        select: {
-          id: true,
-          uuid: true,
-          username: true,
-          name: true,
-          role: true,
-          email: true,
+        omit: {
+          password: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
 
@@ -196,39 +190,27 @@ export const userServices = {
 
       if (!search) return createResponse(404, "User not found");
 
-      const changePass = body.password
-        ? await hashPassword(body.password)
-        : search.password;
+      const updatedData = {
+        ...search,
+        ...body,
+        password: body.password
+          ? await hashPassword(body.password)
+          : search.password,
+        role: body.role ? body.role?.toUpperCase() : search.role,
+      };
 
-      if (payload.role === "ADMIN") {
-        const newRole = body.role ?? search.role;
+      if (
+        payload.role === "ADMIN" &&
+        !["ADMIN", "USER", "MASKAPAI"].includes(updatedData.role)
+      )
+        return createResponse(400, "Role yang di berikan tidak valid");
 
-        if (!["ADMIN", "USER", "MASKAPAI"].includes(newRole.toUpperCase()))
-          return createResponse(400, "Role yang di berikan tidak valid");
-
-        await prisma_connection.tbl_user.update({
-          where: {
-            id: search.id,
-          },
-          data: {
-            name: body.name || search.name,
-            username: body.username || search.username,
-            email: body.email || search.email,
-            role: newRole.toUpperCase(),
-          },
-        });
-      } else {
-        await prisma_connection.tbl_user.update({
-          where: {
-            id: payload.id,
-          },
-          data: {
-            name: body.name || search.name,
-            email: body.email || search.email,
-            password: changePass,
-          },
-        });
-      }
+      await prisma_connection.tbl_user.update({
+        where: {
+          id: search.id,
+        },
+        data: updatedData,
+      });
 
       return createResponse(200, "User berhasil di ubah!");
     } catch (error) {
