@@ -12,10 +12,8 @@ export interface LOGIN {
 }
 
 export interface USER {
-  id: number;
-  uuid: string;
-  username: string;
+  id: string;
   name: string;
   email: string;
-  role: string
+  role: string;
 }

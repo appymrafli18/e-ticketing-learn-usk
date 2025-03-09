@@ -54,7 +54,7 @@ export const FlightsServices = {
           ...(payload.role === "MASKAPAI" && {
             airlinesId: searchAirlines?.id,
           }),
-          id: Number(id),
+          id,
         },
         omit: {
           airlinesId: true,
@@ -126,7 +126,7 @@ export const FlightsServices = {
 
       const searchFlights = await prisma_connection.tbl_flights.findUnique({
         where: {
-          id: Number(id),
+          id,
           ...(payload.role === "MASKAPAI" && {
             airlinesId: searchAirlines?.id,
           }),
@@ -161,7 +161,7 @@ export const FlightsServices = {
 
       const searchFlights = await prisma_connection.tbl_flights.findUnique({
         where: {
-          id: Number(id),
+          id,
           ...(payload.role === "MASKAPAI" && {
             airlinesId: searchAirlines?.id,
           }),

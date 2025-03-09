@@ -19,20 +19,18 @@ enum Role {
   MASKAPAI
 }
 
-enum Status {
+enum StatusBooking {
+  Booked
   Pending
-  Confirmed
-  Canceled
+  Expired
 }
 
 model tbl_user {
-  id Int @id @default(autoincrement())
-  uuid String @unique @default(uuid())
-  username String @unique
-  name String @db.VarChar(100)
-  email String @unique
-  password String @db.VarChar(255)
-  role Role @default(USER)
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(100)
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -41,18 +39,13 @@ model tbl_user {
 
   // relasi one-to-many
   bookings tbl_bookings[]
-
-  // relasi one-to-many
-  notifications tbl_notifications[]
 }
 
 model tbl_airlines {
-  id Int @id @default(autoincrement())
-  name String @db.VarChar(100)
-  logo String @db.VarChar(255)
-  userId Int @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id     String @id @default(cuid())
+  name   String @db.VarChar(100)
+  logo   String @db.VarChar(255)
+  userId String @unique
 
   // relasi one-to-one dengan tbl_user
   user tbl_user @relation(fields: [userId], references: [id])
@@ -62,66 +55,37 @@ model tbl_airlines {
 }
 
 model tbl_flights {
-  id Int @id @default(autoincrement())
-  no_penerbangan String
-  kota_keberangkatan String
-  kota_tujuan String
+  id                  String   @id @default(cuid())
+  no_penerbangan      String
+  kota_keberangkatan  String
+  kota_tujuan         String
   waktu_keberangkatan DateTime
-  waktu_kedatangan DateTime
-  harga Decimal @db.Decimal(10, 2)
-  kapasitas_kursi Int
-  kursi_tersedia Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  waktu_kedatangan    DateTime
+  harga               Decimal  @db.Decimal(10, 2)
+  kapasitas_kursi     Int
+  kursi_tersedia      Int
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // relasi one-to-many dengan tbl_airlines
+  airlinesId String
+  airlines   tbl_airlines @relation(fields: [airlinesId], references: [id])
 
   // relasi one-to-many dengan tbl_bookings
   bookings tbl_bookings[]
-
-  // relasi one-to-many dengan tbl_airlines
-  airlinesId Int
-  airlines tbl_airlines @relation(fields: [airlinesId], references: [id])
 }
 
 model tbl_bookings {
-  id Int @id @default(autoincrement())
+  id           String        @id @default(cuid())
   jumlah_kursi Int
-  total_harga Decimal @db.Decimal(10, 2)
-  status Status @default(Pending)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // one-to-one dengan tbl_bookings
-  payments tbl_payments?
+  total_harga  Decimal       @db.Decimal(10, 2)
+  status       StatusBooking @default(Pending)
 
   // relasi one-to-many dengan tbl_flights
-  flightId Int
-  flight tbl_flights @relation(fields: [flightId], references: [id])
+  flightId String
+  flight   tbl_flights @relation(fields: [flightId], references: [id])
 
   // relasi one-to-many dengan tbl_user
-  userId Int
-  user tbl_user @relation(fields: [userId], references: [id])
-}
-
-model tbl_payments {
-  id String @id @default(uuid())
-  payment_method String
-  jumlah_pembayaran Decimal @db.Decimal(10, 2)
-  status Status @default(Pending)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // relasi one-to-one dengan tbl_bookings
-  bookingId Int @unique
-  booking tbl_bookings @relation(fields: [bookingId], references: [id])
-}
-
-model tbl_notifications {
-  id Int @id @default(autoincrement())
-  userId Int @unique
-  message String
-  isRead Boolean @default(false)
-  createdAt DateTime @default(now())
-
-  // relasi one-to-many
-  user tbl_user @relation(fields: [userId], references: [id])
+  userId String
+  user   tbl_user @relation(fields: [userId], references: [id])
 }

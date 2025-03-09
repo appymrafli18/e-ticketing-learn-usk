@@ -55,6 +55,8 @@ export async function PUT(
   switch (id[0]) {
     case "update":
       return BookingServices.updateBookings(req, id[1], verif);
+    case "pay":
+      return BookingServices.updateBookingsStatus(req, id[1], verif);
     default:
       return createResponse(404, "Not Found");
   }

@@ -29,7 +29,6 @@ export const userServices = {
       await prisma_connection.tbl_user.create({
         data: {
           name: data.name,
-          username: data.username,
           email: data.email,
           password: hashing,
         },
@@ -61,7 +60,6 @@ export const userServices = {
 
       const payload: IPayload = {
         id: findUser.id,
-        username: findUser.username,
         name: findUser.name,
         email: findUser.email,
         role: findUser.role,
@@ -131,7 +129,7 @@ export const userServices = {
     try {
       const findUser = await prisma_connection.tbl_user.findFirst({
         where: {
-          uuid: params,
+          id: params,
         },
         omit: {
           password: true,
@@ -177,14 +175,14 @@ export const userServices = {
       return createResponse(400, (error as Error).message);
     }
   },
-  updateUser: async (req: Request, uuid: string, payload: IPayload) => {
+  updateUser: async (req: Request, id: string, payload: IPayload) => {
     if (payload.role !== "ADMIN") return createResponse(401, "Unauthorized");
     try {
       const body = await req.json();
 
       const search = await prisma_connection.tbl_user.findUnique({
         where: {
-          uuid,
+          id,
         },
       });
 
@@ -217,12 +215,12 @@ export const userServices = {
       return createResponse(400, (error as Error).message);
     }
   },
-  deleteUser: async (payload: IPayload, uuid: string) => {
+  deleteUser: async (payload: IPayload, id: string) => {
     if (payload.role !== "ADMIN") return createResponse(401, "Unauthorized");
     try {
       const search = await prisma_connection.tbl_user.findUnique({
         where: {
-          uuid,
+          id,
         },
       });
 

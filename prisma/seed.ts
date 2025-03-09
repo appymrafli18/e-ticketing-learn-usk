@@ -4,7 +4,7 @@ import argon2 from "argon2";
 async function main() {
   const admin = await prisma_connection.tbl_user.findUnique({
     where: {
-      username: "admin",
+      email: "admin@gmail.com",
     },
   });
 
@@ -14,7 +14,6 @@ async function main() {
     await prisma_connection.tbl_user.create({
       data: {
         name: "admin",
-        username: "admin",
         email: "admin@gmail.com",
         password: hashingPassword,
         role: "ADMIN",
@@ -29,12 +28,11 @@ async function main() {
     await prisma_connection.tbl_user.create({
       data: {
         name: `Maskapai ${i}`,
-        username: `maskapai${i}`,
         email: `maskapai${i}@gmail.com`,
         password: hashingPassword,
         role: "MASKAPAI",
       },
-    })
+    });
     console.log(`MASKAPAI ${i} CREATED!`);
   }
 
@@ -44,16 +42,14 @@ async function main() {
     await prisma_connection.tbl_user.create({
       data: {
         name: `User ${i}`,
-        username: `user${i}`,
         email: `user${i}@gmail.com`,
         password: hashingPassword,
         role: "USER",
       },
-    })
+    });
     console.log(`USER ${i} CREATED!`);
   }
 }
-
 
 main()
   .catch((e) => {

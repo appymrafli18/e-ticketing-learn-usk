@@ -39,7 +39,7 @@ export const airlineService = {
     try {
       const response = await prisma_connection.tbl_airlines.findUnique({
         where: {
-          id: Number(id),
+          id,
           ...(payload.role === "MASKAPAI" && { userId: payload.id }),
         },
         omit: {
@@ -82,7 +82,7 @@ export const airlineService = {
         data: {
           name: formData.get("name") as string,
           logo: file.name,
-          userId: Number(payload.id),
+          userId: payload.id,
         },
       });
 
@@ -102,7 +102,7 @@ export const airlineService = {
 
       const search = await prisma_connection.tbl_airlines.findUnique({
         where: {
-          id: Number(id),
+          id,
         },
       });
 
@@ -127,7 +127,7 @@ export const airlineService = {
 
       await prisma_connection.tbl_airlines.update({
         where: {
-          id: Number(id),
+          id,
         },
         data: {
           name: formData.get("name") as string,
@@ -145,7 +145,7 @@ export const airlineService = {
     try {
       const search = await prisma_connection.tbl_airlines.findUnique({
         where: {
-          id: Number(id),
+          id,
         },
       });
 

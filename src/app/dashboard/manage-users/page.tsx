@@ -42,10 +42,7 @@ const Page: React.FC = () => {
   const onSave = async (values: USER) => {
     setLoading(true);
     try {
-      const response = await axios.put(
-        `/api/user/update/${values.uuid}`,
-        values
-      );
+      const response = await axios.put(`/api/user/update/${values.id}`, values);
 
       if (response.status === 200) {
         toast.success("Berhasil Mengubah Data User");

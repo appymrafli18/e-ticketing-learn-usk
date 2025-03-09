@@ -36,5 +36,6 @@ export const config = {
     "/login",
     "/api/airlines/:path*",
     "/api/flights/:path*",
+    "/api/bookings/:path*",
   ],
 };
