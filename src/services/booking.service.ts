@@ -1,0 +1,235 @@
+import { prisma_connection } from "@/lib/prisma-orm";
+import { ICreateBooking } from "@/types/booking";
+import { IPayload } from "@/types/jwt";
+
+const bookingServices = {
+  getAllBookings: async (user: IPayload) => {
+    try {
+      const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
+        where: {
+          userId: user.id,
+        },
+        include: {
+          flights: true,
+        },
+      });
+
+      if (!searchAirlines && user.role === "MASKAPAI")
+        return { statusCode: 404, message: "Airlines not found" };
+
+      const airlinesId = searchAirlines?.id;
+      const response = await prisma_connection.tbl_bookings.findMany({
+        where: {
+          ...(user.role === "USER" && { userId: user.id }),
+          flight: {
+            airlinesId: airlinesId,
+          },
+        },
+        omit: {
+          userId: true,
+        },
+      });
+
+      if (!response) return { statusCode: 404, message: "Bookings not found" };
+
+      return { statusCode: 200, message: "Success", data: response };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+  getOneBooking: async (uuid: string, user: IPayload) => {
+    try {
+      const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
+        where: {
+          userId: user.id,
+        },
+        include: {
+          flights: true,
+        },
+      });
+
+      if (!searchAirlines && user.role === "MASKAPAI")
+        return { statusCode: 404, message: "Airlines not found" };
+
+      const airlinesId = searchAirlines?.id;
+      const response = await prisma_connection.tbl_bookings.findUnique({
+        where: {
+          uuid,
+          ...(user.role === "USER" && { userId: user.id }),
+          flight: {
+            airlinesId: airlinesId,
+          },
+        },
+        omit: {
+          flightId: true,
+          userId: true,
+        },
+        include: {
+          flight: {
+            omit: {
+              kapasitas_kursi: true,
+              kursi_tersedia: true,
+              airlinesId: true,
+            },
+          },
+        },
+      });
+
+      if (!response) return { statusCode: 404, message: "Bookings not found" };
+
+      return { statusCode: 200, message: "Success", data: response };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+  createBookings: async (body: ICreateBooking, user: IPayload) => {
+    if (user.role === "MASKAPAI")
+      return { statusCode: 401, message: "Unauthorized" };
+    try {
+      const searchFlights = await prisma_connection.tbl_flights.findUnique({
+        where: {
+          uuid: body.flightId,
+        },
+      });
+
+      if (!searchFlights)
+        return { statusCode: 404, message: "Flights not found" };
+
+      const data = {
+        jumlah_kursi: Number(body.jumlah_kursi),
+        total_harga: searchFlights.harga.toNumber() * Number(body.jumlah_kursi),
+        flightId: searchFlights.id,
+        userId: user.role === "ADMIN" ? (body.userId as number) : user.id,
+      };
+
+      const searchBookings = await prisma_connection.tbl_bookings.findFirst({
+        where: {
+          flightId: data.flightId,
+          userId: data.userId,
+        },
+      });
+
+      if (searchBookings) {
+        await prisma_connection.tbl_bookings.update({
+          data,
+          where: {
+            id: searchBookings.id,
+          },
+        });
+      } else {
+        await prisma_connection.tbl_bookings.create({
+          data: {
+            userId: data.userId,
+            jumlah_kursi: data.jumlah_kursi,
+            flightId: data.flightId,
+            total_harga: data.total_harga,
+          },
+        });
+      }
+
+      return { statusCode: 200, message: "Success", data };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+  updateBookings: async (
+    body: ICreateBooking,
+    uuid: string,
+    user: IPayload
+  ) => {
+    if (user.role === "MASKAPAI")
+      return { statusCode: 401, message: "Unauthorized" };
+    try {
+      const searchFlights = await prisma_connection.tbl_flights.findUnique({
+        where: {
+          uuid: body.flightId,
+        },
+        include: {
+          bookings: true,
+        },
+      });
+
+      if (!searchFlights)
+        return { statusCode: 404, message: "Flights not found" };
+      if (searchFlights.kursi_tersedia < Number(body.jumlah_kursi))
+        return {
+          statusCode: 400,
+          message: "Jumlah kursi melebihi kapasitas kursi",
+        };
+
+      const searchBookings = await prisma_connection.tbl_bookings.findUnique({
+        where: {
+          uuid,
+          ...(user.role === "USER" && { userId: user.id }),
+        },
+      });
+
+      if (!searchBookings)
+        return { statusCode: 404, message: "Bookings not found" };
+
+      const data = {
+        jumlah_kursi: Number(body.jumlah_kursi),
+        total_harga: searchFlights.harga.toNumber() * Number(body.jumlah_kursi),
+        flightId: searchFlights.id,
+        userId: user.role === "ADMIN" ? (body.userId as number) : user.id,
+      };
+
+      await prisma_connection.tbl_bookings.update({
+        where: {
+          id: searchBookings.id,
+        },
+        data,
+      });
+
+      return { statusCode: 200, message: "Success updated booking!" };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+  deleteBookings: async (uuid: string, user: IPayload) => {
+    if (user.role === "MASKAPAI")
+      return { statusCode: 401, message: "Unauthorized" };
+    try {
+      const search = await prisma_connection.tbl_bookings.findUnique({
+        where: {
+          uuid,
+          ...(user.role === "USER" && { userId: user.id }),
+        },
+      });
+
+      if (!search) return { statusCode: 404, message: "Bookings not found" };
+
+      await prisma_connection.tbl_bookings.delete({
+        where: {
+          id: search.id,
+        },
+      });
+
+      return { statusCode: 200, message: "Success Deleted Bookings" };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+};
+
+export default bookingServices;
