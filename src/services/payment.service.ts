@@ -1,0 +1,257 @@
+import { prisma_connection } from "@/lib/prisma-orm";
+import { IPayload } from "@/types/jwt";
+import { IPayment } from "@/types/payment";
+import { Status } from "@prisma/client";
+
+const paymentServices = {
+  getAllPayments: async (user: IPayload) => {
+    if (user.role === "MASKAPAI")
+      return { statusCode: 401, message: "Unauthorized" };
+    try {
+      const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
+        where: {
+          userId: user.id,
+        },
+        include: {
+          flights: true,
+        },
+      });
+
+      if (!searchAirlines && user.role === "MASKAPAI")
+        return { statusCode: 404, message: "Airlines not found" };
+
+      const airlinesId = searchAirlines?.id;
+      const response = await prisma_connection.tbl_payments.findMany({
+        where: {
+          booking: {
+            ...(user.role === "USER" && { userId: user.id }),
+            flight: {
+              airlinesId: airlinesId,
+            },
+          },
+        },
+        include: {
+          booking: {
+            include: {
+              flight: {
+                omit: {
+                  kapasitas_kursi: true,
+                  kursi_tersedia: true,
+                  airlinesId: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!response) return { statusCode: 404, message: "Payments not found" };
+
+      return { statusCode: 200, message: "Success", data: response };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
+  getOnePayment: async (id: string, user: IPayload) => {
+    if (user.role === "MASKAPAI")
+      return { statusCode: 401, message: "Unauthorized" };
+    try {
+      const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
+        where: {
+          userId: user.id,
+        },
+        include: {
+          flights: true,
+        },
+      });
+
+      if (!searchAirlines && user.role === "MASKAPAI")
+        return { statusCode: 404, message: "Airlines not found" };
+
+      const airlinesId = searchAirlines?.id;
+      const response = await prisma_connection.tbl_payments.findUnique({
+        where: {
+          id,
+          booking: {
+            ...(user.role === "USER" && { userId: user.id }),
+            flight: {
+              airlinesId: airlinesId,
+            },
+          },
+        },
+        include: {
+          booking: {
+            include: {
+              flight: {
+                omit: {
+                  kapasitas_kursi: true,
+                  kursi_tersedia: true,
+                  airlinesId: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!response) return { statusCode: 404, message: "Payment not found" };
+
+      return { statusCode: 200, message: "Success", data: response };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
+  createPayment: async (body: IPayment, user: IPayload) => {
+    if (user.role !== "USER")
+      return { statusCode: 401, message: "Unauthorized" };
+    try {
+      const searchBooking = await prisma_connection.tbl_bookings.findUnique({
+        where: {
+          uuid: body.bookingId,
+        },
+      });
+
+      if (!searchBooking)
+        return { statusCode: 404, message: "Booking not found" };
+
+      const data = {
+        payment_method: body.payment_method,
+        jumlah_pembayaran: searchBooking.total_harga,
+        bookingId: searchBooking.id,
+      };
+
+      const response = await prisma_connection.tbl_payments.create({
+        data,
+      });
+
+      return { statusCode: 200, message: "Success", data: response };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
+  updatePayment: async (id: string, body: IPayment, user: IPayload) => {
+    if (user.role !== "ADMIN")
+      return { statusCode: 401, message: "Unauthorized" };
+
+    try {
+      const searchPayment = await prisma_connection.tbl_payments.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          booking: true,
+        },
+      });
+
+      if (!searchPayment)
+        return { statusCode: 404, message: "Payment not found" };
+
+      const data = {
+        payment_method: body.payment_method,
+        jumlah_pembayaran: body.jumlah_pembayaran,
+        status: (body.status as Status) || searchPayment.status,
+      };
+
+      if (body?.status && !(body.status in Status))
+        return { statusCode: 400, message: "Status not found" };
+
+      if (body.status === "Confirmed") {
+        const flightId = searchPayment.booking.flightId;
+        const countKursi = searchPayment.booking.jumlah_kursi;
+
+        const flight = await prisma_connection.tbl_flights.findUnique({
+          where: {
+            id: flightId,
+          },
+        });
+
+        if (!flight) return { statusCode: 404, message: "Flight not found" };
+
+        if (flight.kursi_tersedia < countKursi)
+          return {
+            statusCode: 400,
+            message: "Kursi not enough",
+          };
+
+        await prisma_connection.tbl_flights.update({
+          where: {
+            id: flight.id,
+          },
+          data: {
+            kursi_tersedia: flight.kursi_tersedia - countKursi,
+          },
+        });
+
+        await prisma_connection.tbl_bookings.update({
+          where: {
+            id: searchPayment.bookingId,
+          },
+          data: {
+            status: data.status,
+          },
+        });
+      }
+
+      const response = await prisma_connection.tbl_payments.update({
+        where: {
+          id: searchPayment.id,
+        },
+        data,
+      });
+
+      return { statusCode: 200, message: "Success", data: response };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
+  deletePayment: async (id: string, user: IPayload) => {
+    if (user.role !== "ADMIN")
+      return { statusCode: 401, message: "Unauthorized" };
+    try {
+      const searchPayment = await prisma_connection.tbl_payments.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      if (!searchPayment)
+        return { statusCode: 404, message: "Payment not found" };
+
+      await prisma_connection.tbl_payments.delete({
+        where: {
+          id: searchPayment.id,
+        },
+      });
+
+      return { statusCode: 200, message: "Success Deleted Payment" };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+};
+
+export default paymentServices;

@@ -1,6 +1,8 @@
 import airlinesRoutes from "@/routes/airlines.route";
 import authRoutes from "@/routes/auth.route";
+import bookingRoutes from "@/routes/booking.route";
 import flightRoutes from "@/routes/flight.route";
+import paymentRoutes from "@/routes/payment.route";
 import userRoutes from "@/routes/user.route";
 import Elysia, { Context } from "elysia";
 
@@ -16,6 +18,9 @@ app.use(userRoutes);
 app.use(authRoutes);
 app.use(airlinesRoutes);
 app.use(flightRoutes);
+app.use(bookingRoutes);
+app.use(paymentRoutes);
+
 
 export const GET = app.handle;
 export const POST = app.handle;

@@ -25,6 +25,11 @@ enum Status {
   Canceled
 }
 
+enum TypeReport {
+  Transaksi
+  Penerbangan
+}
+
 model tbl_user {
   id        Int      @id @default(autoincrement())
   uuid      String   @unique @default(uuid())
@@ -41,6 +46,7 @@ model tbl_user {
 
   // relasi one-to-many
   bookings tbl_bookings[]
+  Report   Report[]
 }
 
 model tbl_airlines {
@@ -113,4 +119,17 @@ model tbl_payments {
   // relasi one-to-one dengan tbl_bookings
   bookingId Int          @unique
   booking   tbl_bookings @relation(fields: [bookingId], references: [id])
+}
+
+model Report {
+  id        Int        @id @default(autoincrement())
+  uuid      String     @unique @default(uuid())
+  type      TypeReport
+  data      Json
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relasi many-to-one dengan User (admin/maskapai/pelanggan)
+  userId Int
+  user   tbl_user @relation(fields: [userId], references: [id])
 }
