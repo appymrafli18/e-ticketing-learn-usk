@@ -34,7 +34,7 @@ async function main() {
         password: hashingPassword,
         role: "MASKAPAI",
       },
-    })
+    });
     console.log(`MASKAPAI ${i} CREATED!`);
   }
 
@@ -49,11 +49,56 @@ async function main() {
         password: hashingPassword,
         role: "USER",
       },
-    })
+    });
     console.log(`USER ${i} CREATED!`);
   }
-}
 
+  // generate airlines
+  for (let i = 1; i <= 5; i++) {
+    const searchMaskapai = await prisma_connection.tbl_user.findFirst({
+      where: {
+        role: "MASKAPAI",
+        email: `maskapai${i}@gmail.com`,
+      },
+    });
+
+    if (searchMaskapai) {
+      await prisma_connection.tbl_airlines.create({
+        data: {
+          name: `Airlines ${i}`,
+          logo: `airlines${i}.png`,
+          userId: searchMaskapai.id,
+        },
+      });
+      console.log(`AIRLINES ${i} CREATED!`);
+
+      const searchAirlines = await prisma_connection.tbl_airlines.findFirst({
+        where: {
+          userId: searchMaskapai.id,
+        },
+      });
+
+      if (searchAirlines) {
+        await prisma_connection.tbl_flights.create({
+          data: {
+            no_penerbangan: "CT12",
+            kota_keberangkatan: "Jakarta",
+            kota_tujuan: "Pekanbaru",
+            waktu_keberangkatan: "2025-02-12T08:30:00Z",
+            waktu_kedatangan: "2025-02-12T11:00:00Z",
+            harga: 1000 * i,
+            kapasitas_kursi: 100,
+            kursi_tersedia: 70,
+            airlinesId: searchAirlines.id,
+          },
+        });
+        console.log(`FLIGHTS ${i} CREATED!`);
+      }
+    }
+  }
+
+  console.log("SEEDING DONE!");
+}
 
 main()
   .catch((e) => {

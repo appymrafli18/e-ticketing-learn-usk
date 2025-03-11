@@ -3,6 +3,7 @@ import authRoutes from "@/routes/auth.route";
 import bookingRoutes from "@/routes/booking.route";
 import flightRoutes from "@/routes/flight.route";
 import paymentRoutes from "@/routes/payment.route";
+import reportRoutes from "@/routes/report.route";
 import userRoutes from "@/routes/user.route";
 import Elysia, { Context } from "elysia";
 
@@ -20,7 +21,7 @@ app.use(airlinesRoutes);
 app.use(flightRoutes);
 app.use(bookingRoutes);
 app.use(paymentRoutes);
-
+app.use(reportRoutes);
 
 export const GET = app.handle;
 export const POST = app.handle;

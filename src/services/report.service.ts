@@ -1,12 +1,10 @@
 import { prisma_connection } from "@/lib/prisma-orm";
 import { IPayload } from "@/types/jwt";
-import { IPayment } from "@/types/payment";
-import { Status } from "@prisma/client";
+import { ReportData } from "@/types/report";
+import { Prisma, TypeReport } from "@prisma/client";
 
-const paymentServices = {
-  getAllPayments: async (user: IPayload) => {
-    if (user.role === "MASKAPAI")
-      return { statusCode: 401, message: "Unauthorized" };
+const reportServices = {
+  getAllReports: async (user: IPayload) => {
     try {
       const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
         where: {
@@ -21,10 +19,9 @@ const paymentServices = {
         return { statusCode: 404, message: "Airlines not found" };
 
       const airlinesId = searchAirlines?.id;
-      const response = await prisma_connection.tbl_payments.findMany({
+      const response = await prisma_connection.tbl_reports.findMany({
         where: {
           booking: {
-            ...(user.role === "USER" && { userId: user.id }),
             flight: {
               airlinesId: airlinesId,
             },
@@ -45,7 +42,7 @@ const paymentServices = {
         },
       });
 
-      if (!response) return { statusCode: 404, message: "Payments not found" };
+      if (!response) return { statusCode: 404, message: "Reports not found" };
 
       return { statusCode: 200, message: "Success", data: response };
     } catch (error) {
@@ -57,9 +54,7 @@ const paymentServices = {
     }
   },
 
-  getOnePayment: async (uuid: string, user: IPayload) => {
-    if (user.role === "MASKAPAI")
-      return { statusCode: 401, message: "Unauthorized" };
+  getOneReport: async (uuid: string, user: IPayload) => {
     try {
       const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
         where: {
@@ -74,11 +69,10 @@ const paymentServices = {
         return { statusCode: 404, message: "Airlines not found" };
 
       const airlinesId = searchAirlines?.id;
-      const response = await prisma_connection.tbl_payments.findUnique({
+      const response = await prisma_connection.tbl_reports.findUnique({
         where: {
           uuid,
           booking: {
-            ...(user.role === "USER" && { userId: user.id }),
             flight: {
               airlinesId: airlinesId,
             },
@@ -99,7 +93,7 @@ const paymentServices = {
         },
       });
 
-      if (!response) return { statusCode: 404, message: "Payment not found" };
+      if (!response) return { statusCode: 404, message: "Report not found" };
 
       return { statusCode: 200, message: "Success", data: response };
     } catch (error) {
@@ -111,8 +105,11 @@ const paymentServices = {
     }
   },
 
-  createPayment: async (body: IPayment, user: IPayload) => {
-    if (user.role !== "USER")
+  createReport: async (
+    body: { bookingId: string; type: string; data: ReportData },
+    user: IPayload
+  ) => {
+    if (user.role !== "ADMIN")
       return { statusCode: 401, message: "Unauthorized" };
     try {
       const searchBooking = await prisma_connection.tbl_bookings.findUnique({
@@ -125,12 +122,16 @@ const paymentServices = {
         return { statusCode: 404, message: "Booking not found" };
 
       const data = {
-        payment_method: body.payment_method,
-        jumlah_pembayaran: searchBooking.total_harga,
+        type: body.type as TypeReport,
+        data: body.data as Prisma.JsonObject,
         bookingId: searchBooking.id,
+        userId: user.id,
       };
 
-      const response = await prisma_connection.tbl_payments.create({
+      if (body?.type && !(body.type in TypeReport))
+        return { statusCode: 400, message: "Type not found" };
+
+      const response = await prisma_connection.tbl_reports.create({
         data,
       });
 
@@ -144,72 +145,34 @@ const paymentServices = {
     }
   },
 
-  updatePayment: async (uuid: string, body: IPayment, user: IPayload) => {
+  updateReport: async (
+    uuid: string,
+    body: { type?: string; data?: ReportData },
+    user: IPayload
+  ) => {
     if (user.role !== "ADMIN")
       return { statusCode: 401, message: "Unauthorized" };
-
     try {
-      const searchPayment = await prisma_connection.tbl_payments.findUnique({
+      const searchReport = await prisma_connection.tbl_reports.findUnique({
         where: {
           uuid,
         },
-        include: {
-          booking: true,
-        },
       });
 
-      if (!searchPayment)
-        return { statusCode: 404, message: "Payment not found" };
+      if (!searchReport)
+        return { statusCode: 404, message: "Report not found" };
 
       const data = {
-        payment_method: body.payment_method,
-        jumlah_pembayaran: body.jumlah_pembayaran,
-        status: (body.status as Status) || searchPayment.status,
+        type: body.type as TypeReport,
+        data: body.data as Prisma.JsonObject,
       };
 
-      if (body?.status && !(body.status in Status))
-        return { statusCode: 400, message: "Status not found" };
+      if (body?.type && !(body.type in TypeReport))
+        return { statusCode: 400, message: "Type not found" };
 
-      if (body.status === "Confirmed") {
-        const flightId = searchPayment.booking.flightId;
-        const countKursi = searchPayment.booking.jumlah_kursi;
-
-        const flight = await prisma_connection.tbl_flights.findUnique({
-          where: {
-            id: flightId,
-          },
-        });
-
-        if (!flight) return { statusCode: 404, message: "Flight not found" };
-
-        if (flight.kursi_tersedia < countKursi)
-          return {
-            statusCode: 400,
-            message: "Kursi not enough",
-          };
-
-        await prisma_connection.tbl_flights.update({
-          where: {
-            id: flight.id,
-          },
-          data: {
-            kursi_tersedia: flight.kursi_tersedia - countKursi,
-          },
-        });
-
-        await prisma_connection.tbl_bookings.update({
-          where: {
-            id: searchPayment.bookingId,
-          },
-          data: {
-            status: data.status,
-          },
-        });
-      }
-
-      const response = await prisma_connection.tbl_payments.update({
+      const response = await prisma_connection.tbl_reports.update({
         where: {
-          id: searchPayment.id,
+          id: searchReport.id,
         },
         data,
       });
@@ -224,26 +187,26 @@ const paymentServices = {
     }
   },
 
-  deletePayment: async (uuid: string, user: IPayload) => {
+  deleteReport: async (uuid: string, user: IPayload) => {
     if (user.role !== "ADMIN")
       return { statusCode: 401, message: "Unauthorized" };
     try {
-      const searchPayment = await prisma_connection.tbl_payments.findUnique({
+      const searchReport = await prisma_connection.tbl_reports.findUnique({
         where: {
           uuid,
         },
       });
 
-      if (!searchPayment)
-        return { statusCode: 404, message: "Payment not found" };
+      if (!searchReport)
+        return { statusCode: 404, message: "Report not found" };
 
-      await prisma_connection.tbl_payments.delete({
+      await prisma_connection.tbl_reports.delete({
         where: {
-          id: searchPayment.id,
+          id: searchReport.id,
         },
       });
 
-      return { statusCode: 200, message: "Success Deleted Payment" };
+      return { statusCode: 200, message: "Success Deleted Report" };
     } catch (error) {
       return {
         statusCode: 400,
@@ -254,4 +217,4 @@ const paymentServices = {
   },
 };
 
-export default paymentServices;
+export default reportServices;

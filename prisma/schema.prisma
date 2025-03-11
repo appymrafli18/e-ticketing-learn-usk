@@ -28,6 +28,8 @@ enum Status {
 enum TypeReport {
   Transaksi
   Penerbangan
+  Keuangan
+  Lainnya
 }
 
 model tbl_user {
@@ -46,7 +48,7 @@ model tbl_user {
 
   // relasi one-to-many
   bookings tbl_bookings[]
-  Report   Report[]
+  Report   tbl_reports[]
 }
 
 model tbl_airlines {
@@ -104,12 +106,14 @@ model tbl_bookings {
   flight   tbl_flights @relation(fields: [flightId], references: [id])
 
   // relasi one-to-many dengan tbl_user
-  userId Int
-  user   tbl_user @relation(fields: [userId], references: [id])
+  userId      Int
+  user        tbl_user      @relation(fields: [userId], references: [id])
+  tbl_reports tbl_reports[]
 }
 
 model tbl_payments {
-  id                String   @id @default(uuid())
+  id                Int      @id @default(autoincrement())
+  uuid              String   @unique @default(uuid())
   payment_method    String
   jumlah_pembayaran Decimal  @db.Decimal(10, 2)
   status            Status   @default(Pending)
@@ -119,17 +123,28 @@ model tbl_payments {
   // relasi one-to-one dengan tbl_bookings
   bookingId Int          @unique
   booking   tbl_bookings @relation(fields: [bookingId], references: [id])
+
+  // Relasi one-to-many dengan tbl_reports (satu pembayaran bisa memiliki banyak laporan)
+  tbl_reports tbl_reports[]
 }
 
-model Report {
+model tbl_reports {
   id        Int        @id @default(autoincrement())
   uuid      String     @unique @default(uuid())
-  type      TypeReport
-  data      Json
+  type      TypeReport // Enum untuk jenis laporan
+  data      Json // Data laporan dalam format JSON
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  // Relasi many-to-one dengan User (admin/maskapai/pelanggan)
+  // Relasi many-to-one
   userId Int
   user   tbl_user @relation(fields: [userId], references: [id])
+
+  // Relasi many-to-one
+  bookingId Int?
+  booking   tbl_bookings? @relation(fields: [bookingId], references: [id])
+
+  // Relasi many-to-one
+  paymentId Int?
+  payment   tbl_payments? @relation(fields: [paymentId], references: [id])
 }
