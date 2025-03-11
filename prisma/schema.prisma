@@ -48,6 +48,7 @@ model tbl_user {
 
 model tbl_airlines {
   id Int @id @default(autoincrement())
+  uuid String @unique @default(uuid())
   name String @db.VarChar(100)
   logo String @db.VarChar(255)
   userId Int @unique
@@ -63,6 +64,7 @@ model tbl_airlines {
 
 model tbl_flights {
   id Int @id @default(autoincrement())
+  uuid String @unique @default(uuid())
   no_penerbangan String
   kota_keberangkatan String
   kota_tujuan String

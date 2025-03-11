@@ -13,8 +13,6 @@
     "prisma:seed": "bun run prisma/seed.ts"
   },
   "dependencies": {
-    "@elysiajs/cookie": "^0.8.0",
-    "@elysiajs/jwt": "^1.2.0",
     "@hookform/resolvers": "^3.10.0",
     "@prisma/client": "^6.3.1",
     "@types/bun": "^1.2.2",

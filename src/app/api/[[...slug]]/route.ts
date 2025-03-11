@@ -1,9 +1,10 @@
+import airlinesRoutes from "@/routes/airlines.route";
 import authRoutes from "@/routes/auth.route";
+import flightRoutes from "@/routes/flight.route";
 import userRoutes from "@/routes/user.route";
 import Elysia, { Context } from "elysia";
-import { cookie } from "@elysiajs/cookie";
 
-const app = new Elysia({ prefix: "/api" }).use(cookie());
+const app = new Elysia({ prefix: "/api" });
 
 app.onAfterHandle(({ response, set }: Context) => {
   if (response && typeof response === "object" && "statusCode" in response) {
@@ -13,6 +14,8 @@ app.onAfterHandle(({ response, set }: Context) => {
 });
 app.use(userRoutes);
 app.use(authRoutes);
+app.use(airlinesRoutes);
+app.use(flightRoutes);
 
 export const GET = app.handle;
 export const POST = app.handle;

@@ -22,3 +22,8 @@ export interface IAirlinesAPI {
   updatedAt: string;
   user: IUser;
 }
+
+export interface IBodyAirlines {
+  name: string;
+  logo: File;
+}
