@@ -1,5 +1,5 @@
 import { ZodError, ZodFormattedError } from "zod";
-export default function converterError(
+export function converterError(
   result: ZodError
 ): Record<string, string> {
   const formattedError = result.format() as ZodFormattedError<
