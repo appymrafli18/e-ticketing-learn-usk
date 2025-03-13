@@ -5,10 +5,15 @@ interface UserTableProps {
   users: USER[] | null;
   loading: boolean;
   onEdit: (selectUser: USER) => void;
-  // onDelete?: (id: number) => void;
+  onDelete: (uuid: string) => void;
 }
 
-const UserTable: React.FC<UserTableProps> = ({ users, loading, onEdit }) => {
+const UserTable: React.FC<UserTableProps> = ({
+  users,
+  loading,
+  onEdit,
+  onDelete,
+}) => {
   return (
     <div className="overflow-x-auto card">
       <table className="min-w-full shadow-md rounded-lg text-center">
@@ -37,8 +42,10 @@ const UserTable: React.FC<UserTableProps> = ({ users, loading, onEdit }) => {
                     Edit
                   </button>
                   <button
-                    onClick={() => {}}
-                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                    onClick={() => {
+                      onDelete(user.uuid);
+                    }}
+                    className="bg-red-500 text-white px-2 py-1 mr-2 rounded hover:bg-red-600"
                   >
                     Delete
                   </button>

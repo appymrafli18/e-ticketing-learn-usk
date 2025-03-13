@@ -8,25 +8,31 @@ interface IEditUserProps {
   onClose: () => void;
   onSave: (value: USER) => void;
   loading: boolean;
-  initialValue: USER | null;
   title: string;
 }
 
-export default function EditUser({
+export default function AddUser({
   isOpen,
   onClose,
   onSave,
   loading,
-  initialValue,
   title,
 }: IEditUserProps) {
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useState<USER>({
+    name: "",
+    username: "",
+    email: "",
+    role: "USER",
+    password: "",
+  });
 
   if (!isOpen) return null;
 
   const onChangeValues = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
+    console.log(e.target.name);
+    console.log(e.target.value);
     setValue((prev) => ({ ...prev, [e.target.name]: e.target.value } as USER));
   };
 
@@ -34,7 +40,7 @@ export default function EditUser({
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-[var(--card)] rounded-lg shadow-lg p-6 w-full max-w-md">
         <h2 className="text-lg font-semibold mb-4 text-[var(--text)]">
-          Edit {title}
+          Add {title}
         </h2>
         <div>
           <label className="text-sm font-medium">Name</label>
@@ -44,7 +50,6 @@ export default function EditUser({
             name="name"
             className="w-full p-2 border-2 rounded-md mb-2 focus:outline-none text-black text-opacity-70 focus:ring-2 focus:ring-blue-500"
             placeholder="Your Name . . ."
-            value={value?.name}
           />
         </div>
         <div>
@@ -55,7 +60,6 @@ export default function EditUser({
             name="username"
             className="w-full p-2 border-2 rounded-md mb-2 focus:outline-none text-black text-opacity-70 focus:ring-2 focus:ring-blue-500"
             placeholder="Your Username . . ."
-            value={value?.username}
           />
         </div>
         <div>
@@ -66,7 +70,6 @@ export default function EditUser({
             name="email"
             className="w-full p-2 border-2 rounded-md mb-2 focus:outline-none text-black text-opacity-70 focus:ring-2 focus:ring-blue-500"
             placeholder="Your Email . . ."
-            value={value?.email}
           />
         </div>
         <div>
@@ -74,13 +77,24 @@ export default function EditUser({
           <select
             name="role"
             onChange={(e) => onChangeValues(e)}
-            defaultValue="user"
+            value={value?.role}
             className="w-full p-2 border-2 rounded-md mb-2 focus:outline-none text-black text-opacity-70 focus:ring-2 focus:ring-blue-500"
           >
-            <option value="admin">ADMIN</option>
-            <option value="user">USER</option>
-            <option value="maskapai">MASKAPAI</option>
+            <option value="ADMIN">ADMIN</option>
+            <option value="USER">USER</option>
+            <option value="MASKAPAI">MASKAPAI</option>
           </select>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Password</label>
+          <input
+            type="password"
+            onChange={(e) => onChangeValues(e)}
+            name="password"
+            className="w-full p-2 border-2 rounded-md mb-2 focus:outline-none text-black text-opacity-70 focus:ring-2 focus:ring-blue-500"
+            placeholder="Your Password . . ."
+          />
         </div>
         <div className="flex justify-end space-x-2 mt-4">
           <button

@@ -12,8 +12,8 @@ export interface LOGIN {
 }
 
 export interface USER {
-  id: number;
-  uuid: string;
+  id?: number;
+  uuid?: string;
   username: string;
   name: string;
   email: string;

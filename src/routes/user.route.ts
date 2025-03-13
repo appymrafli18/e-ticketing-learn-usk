@@ -8,6 +8,7 @@ const userRoutes = new Elysia({ prefix: "/user" });
 userRoutes.onBeforeHandle(middlewareVerifyToken);
 userRoutes.get("/all/:role", userController.getUsers);
 userRoutes.get("/select/:uuid", userController.getOneUser);
+userRoutes.get("/me", userController.getMeUser);
 userRoutes.get("/count", userController.getTotalUser);
 userRoutes.post("/create", userController.createUser, {
   body: t.Object({

@@ -97,6 +97,36 @@ async function main() {
     }
   }
 
+  // generate bookings
+  for (let i = 1; i <= 5; i++) {
+    const searchUser = await prisma_connection.tbl_user.findFirst({
+      where: {
+        role: "USER",
+        email: `user${i}@gmail.com`,
+      },
+    });
+
+    if (searchUser) {
+      const searchFlight = await prisma_connection.tbl_flights.findFirst({
+        where: {
+          no_penerbangan: "CT12",
+        },
+      });
+
+      if (searchFlight) {
+        await prisma_connection.tbl_bookings.create({
+          data: {
+            jumlah_kursi: 1,
+            total_harga: searchFlight.harga.toNumber(),
+            flightId: searchFlight.id,
+            userId: searchUser.id,
+          },
+        });
+        console.log(`BOOKINGS ${i} CREATED!`);
+      }
+    }
+  }
+
   console.log("SEEDING DONE!");
 }
 

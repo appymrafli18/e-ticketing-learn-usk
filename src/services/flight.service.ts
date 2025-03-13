@@ -23,13 +23,6 @@ const flightServices = {
         omit: {
           airlinesId: true,
         },
-        include: {
-          airlines: {
-            omit: {
-              userId: true,
-            },
-          },
-        },
       });
 
       return { statusCode: 200, message: "Success", data: response };

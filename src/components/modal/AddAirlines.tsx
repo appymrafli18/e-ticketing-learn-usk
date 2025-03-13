@@ -8,26 +8,24 @@ interface IAirlines {
   userId: number;
 }
 
-interface IEditAirlinesProps {
+interface IAddAirlinesProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (value: IAirlines) => void;
   loading: boolean;
   userId: number;
-  initialValue: IAirlines;
 }
 
-export default function EditAirlines({
+export default function AddAirlines({
   isOpen,
   onClose,
   onSave,
   loading,
   userId,
-  initialValue,
-}: IEditAirlinesProps) {
+}: IAddAirlinesProps) {
   const [value, setValue] = useState<IAirlines>({
-    name: initialValue.name,
-    logo: initialValue.logo,
+    name: "",
+    logo: "",
     userId: userId,
   });
 
@@ -41,7 +39,7 @@ export default function EditAirlines({
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-[var(--card)] rounded-lg shadow-lg p-6 w-full max-w-md">
         <h2 className="text-lg font-semibold mb-4 text-[var(--text)]">
-          Edit Airlines
+          Add Airlines
         </h2>
         <div>
           <label className="text-sm font-medium">Name</label>
@@ -85,4 +83,4 @@ export default function EditAirlines({
       </div>
     </div>
   );
-}
+} 

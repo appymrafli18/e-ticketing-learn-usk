@@ -105,18 +105,9 @@ export const userServices = {
     if (user.role !== "ADMIN")
       return { statusCode: 401, message: "Unauthorized" };
     try {
-      const { error, data } = createUserSchema.safeParse(body);
-
-      if (error)
-        return {
-          statusCode: 400,
-          message: "Validation Error",
-          error: converterError(error),
-        };
-
       // 🔍 Cek duplikasi username atau email sebelum insert
       const existingUser = await prisma_connection.tbl_user.findFirst({
-        where: { OR: [{ username: data.username }, { email: data.email }] },
+        where: { OR: [{ username: body.username }, { email: body.email }] },
         select: { username: true, email: true },
       });
 
@@ -125,24 +116,24 @@ export const userServices = {
           statusCode: 400,
           message: "Unique constraint error",
           error: {
-            ...(existingUser.username === data.username && {
+            ...(existingUser.username === body.username && {
               username: "Username sudah digunakan",
             }),
-            ...(existingUser.email === data.email && {
+            ...(existingUser.email === body.email && {
               email: "Email sudah digunakan",
             }),
           },
         };
       }
 
-      const hashingPassword = await argon2.hash(data.password);
+      const hashingPassword = await argon2.hash(body.password as string);
 
       await prisma_connection.tbl_user.create({
         data: {
-          name: data.name,
-          username: data.username,
-          email: data.email,
-          role: data.role,
+          name: body.name,
+          username: body.username,
+          email: body.email,
+          role: body.role as Role,
           password: hashingPassword,
         },
       });
@@ -210,6 +201,11 @@ export const userServices = {
 
       if (!search) return { statusCode: 404, message: "User not found" };
 
+      await prisma_connection.tbl_bookings.deleteMany({
+        where: {
+          userId: search.id, // Sesuaikan dengan nama kolom foreign key
+        },
+      });
       await prisma_connection.tbl_user.delete({
         where: {
           id: search.id,

@@ -13,6 +13,7 @@ const Page: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isAdd, setIsAdd] = useState<boolean>(false);
 
   const initialData = useCallback(async () => {
     setErrorMessage("");
@@ -64,6 +65,18 @@ const Page: React.FC = () => {
     }
   };
 
+  const onDelete = (uuid: string) => {
+    axios
+      .delete(`/api/user/delete/${uuid}`)
+      .then(() => {
+        toast.success("Berhasil Delete User");
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      })
+      .catch((error) => console.log(error));
+  };
+
   useEffect(() => {
     initialData();
   }, [initialData]);
@@ -74,7 +87,12 @@ const Page: React.FC = () => {
         <h1 className="text-2xl font-bold mb-6">Manage Maskapai</h1>
         <div className="mb-6"></div>
 
-        <UserTable users={users} loading={loading} onEdit={onEdit} />
+        <UserTable
+          users={users}
+          loading={loading}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
         <div>
           <Toaster position="top-right" reverseOrder={false} />
         </div>
