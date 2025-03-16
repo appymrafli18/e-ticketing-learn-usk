@@ -1,65 +1,67 @@
 import React from "react";
 import Link from "next/link";
 import { USER } from "@/types/user";
+import Image from "next/image";
+import { LayoutDashboard, TableProperties } from "lucide-react";
 
 const listSidebar = [
   {
     url: "/dashboard",
-    title: "Home",
-    allowedRoles: ["ADMIN", "USER", "MASKAPAI"],
+    title: "Dashboard",
+    icon: <LayoutDashboard size={18} />,
+    allowedRoles: ["Admin", "User", "Maskapai"],
   },
   {
-    url: "/dashboard/manage-users",
-    title: "Manage Users",
-    allowedRoles: ["ADMIN"],
-  },
-  {
-    url: "/dashboard/manage-maskapai",
-    title: "Manage Maskapai",
-    allowedRoles: ["ADMIN"],
+    url: "/dashboard/users",
+    title: "Users",
+    icon: <TableProperties size={18} />,
+    allowedRoles: ["Admin"],
   },
   {
     url: "/dashboard/manage-airlines",
     title: "Manage Airlines",
-    allowedRoles: ["ADMIN", "MASKAPAI"],
-  },
-  {
-    url: "/dashboard/manage-admin",
-    title: "Manage Admin",
-    allowedRoles: ["ADMIN"],
+    allowedRoles: ["Admin", "Maskapai"],
   },
   {
     url: "/dashboard/manage-flight",
     title: "Flight",
-    allowedRoles: ["ADMIN", "MASKAPAI"],
+    allowedRoles: ["Admin", "Maskapai"],
   },
   {
     url: "/dashboard/manage-payment",
     title: "Payments",
-    allowedRoles: ["ADMIN", "USER"],
+    allowedRoles: ["Admin", "User"],
   },
   {
     url: "/dashboard/manage-booking",
     title: "Booking",
-    allowedRoles: ["ADMIN", "MASKAPAI", "USER"],
+    allowedRoles: ["Admin", "Maskapai", "User"],
   },
 ];
 
 const Sidebar: React.FC<{ user?: USER | null }> = ({ user }) => {
   return (
-    <div className="w-64 min-h-screen p-4 bg-[var(--foreground)]">
-      <h1 className="text-2xl font-bold mb-6 text-[var(--text-sidebar)]">
-        E-Ticketing
-      </h1>
+    <div className="w-64 min-h-screen p-4 border">
+      <div className="flex items-center mb-4">
+        <Image
+          alt="logo"
+          src={`/logo-eticketing-no-bg.png`}
+          width={50}
+          height={50}
+        />
+        <h1 className="text-2xl font-bold">E-Ticketing</h1>
+      </div>
+      <p className="ml-2 mb-4 opacity-50 text-sm">Menu</p>
       <ul>
         {listSidebar
           .filter((item) => user?.role && item.allowedRoles.includes(user.role))
           .map((values, index) => (
-            <li className="mb-3" key={index}>
+            <li className="my-2 px-4 hover:bg-gray-200 rounded" key={index}>
               <Link
                 href={values.url}
-                className="text-[var(--text-sidebar)] hover:text-[var(--text-sidebar-hover)] block p-2 rounded"
+                className="items-center gap-x-2 text-base p-2 rounded flex"
               >
+                {values?.icon}
                 {values.title}
               </Link>
             </li>

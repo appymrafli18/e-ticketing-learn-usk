@@ -9,16 +9,15 @@ import argon2 from "argon2";
 
 export const userServices = {
   getAllUser: async (role: string, user: IPayload) => {
-    if (user.role !== "ADMIN")
+    if (user.role !== "Admin")
       return { statusCode: 401, message: "Unauthorized" };
 
-    const roleEnum = role.toUpperCase() as Role;
-    if (!(roleEnum in Role))
+    if (!(role in Role))
       return { statusCode: 400, message: "Invalid Selected Path" };
     try {
-      const user = await prisma_connection.tbl_user.findMany({
+      const user = await prisma_connection.user.findMany({
         where: {
-          role: roleEnum,
+          role: role as Role,
         },
         omit: {
           password: true,
@@ -36,12 +35,13 @@ export const userServices = {
       };
     }
   },
+
   getOneUser: async (uuid: string, user: IPayload) => {
-    if (user.role !== "ADMIN")
+    if (user.role !== "Admin")
       return { statusCode: 401, message: "Unauthorized" };
 
     try {
-      const user = await prisma_connection.tbl_user.findUnique({
+      const user = await prisma_connection.user.findUnique({
         where: {
           uuid,
         },
@@ -61,9 +61,10 @@ export const userServices = {
       };
     }
   },
+
   getMeUser: async (user: IPayload) => {
     try {
-      const response = await prisma_connection.tbl_user.findUnique({
+      const response = await prisma_connection.user.findUnique({
         where: {
           id: user.id,
         },
@@ -85,11 +86,12 @@ export const userServices = {
       };
     }
   },
+
   getTotalUser: async (user: IPayload) => {
-    if (user.role !== "ADMIN")
+    if (user.role !== "Admin")
       return { statusCode: 401, message: "Unauthorized" };
     try {
-      const user = await prisma_connection.tbl_user.count();
+      const user = await prisma_connection.user.count();
       if (!user) return { statusCode: 404, message: "Not Have User" };
       return { statusCode: 200, message: "Success", data: user };
     } catch (error) {
@@ -102,12 +104,20 @@ export const userServices = {
   },
 
   createUser: async (body: USER, user: IPayload) => {
-    if (user.role !== "ADMIN")
+    if (user.role !== "Admin")
       return { statusCode: 401, message: "Unauthorized" };
     try {
+      const { error, data } = createUserSchema.safeParse(body);
+
+      if (error)
+        return {
+          statusCode: 400,
+          message: "Validation Error",
+          error: converterError(error),
+        };
       // 🔍 Cek duplikasi username atau email sebelum insert
-      const existingUser = await prisma_connection.tbl_user.findFirst({
-        where: { OR: [{ username: body.username }, { email: body.email }] },
+      const existingUser = await prisma_connection.user.findFirst({
+        where: { OR: [{ username: data.username }, { email: data.email }] },
         select: { username: true, email: true },
       });
 
@@ -116,24 +126,24 @@ export const userServices = {
           statusCode: 400,
           message: "Unique constraint error",
           error: {
-            ...(existingUser.username === body.username && {
+            ...(existingUser.username === data.username && {
               username: "Username sudah digunakan",
             }),
-            ...(existingUser.email === body.email && {
+            ...(existingUser.email === data.email && {
               email: "Email sudah digunakan",
             }),
           },
         };
       }
 
-      const hashingPassword = await argon2.hash(body.password as string);
+      const hashingPassword = await argon2.hash(data.password as string);
 
-      await prisma_connection.tbl_user.create({
+      await prisma_connection.user.create({
         data: {
-          name: body.name,
-          username: body.username,
-          email: body.email,
-          role: body.role as Role,
+          name: data.name,
+          username: data.username,
+          email: data.email,
+          role: data.role as Role,
           password: hashingPassword,
         },
       });
@@ -147,11 +157,12 @@ export const userServices = {
       };
     }
   },
+
   updateUser: async (uuid: string, body: USER, user: IPayload) => {
-    if (user.role !== "ADMIN")
+    if (user.role !== "Admin")
       return { statusCode: 401, message: "Unauthorized" };
     try {
-      const search = await prisma_connection.tbl_user.findUnique({
+      const search = await prisma_connection.user.findUnique({
         where: {
           uuid,
         },
@@ -173,7 +184,7 @@ export const userServices = {
         role: body.role ? (body.role as Role) : search.role,
       };
 
-      await prisma_connection.tbl_user.update({
+      await prisma_connection.user.update({
         where: {
           id: search.id,
         },
@@ -189,11 +200,12 @@ export const userServices = {
       };
     }
   },
+
   deleteUser: async (uuid: string, user: IPayload) => {
-    if (user.role !== "ADMIN")
+    if (user.role !== "Admin")
       return { statusCode: 401, message: "Unauthorized" };
     try {
-      const search = await prisma_connection.tbl_user.findUnique({
+      const search = await prisma_connection.user.findUnique({
         where: {
           uuid,
         },
@@ -201,12 +213,12 @@ export const userServices = {
 
       if (!search) return { statusCode: 404, message: "User not found" };
 
-      await prisma_connection.tbl_bookings.deleteMany({
+      await prisma_connection.booking.deleteMany({
         where: {
           userId: search.id, // Sesuaikan dengan nama kolom foreign key
         },
       });
-      await prisma_connection.tbl_user.delete({
+      await prisma_connection.user.delete({
         where: {
           id: search.id,
         },

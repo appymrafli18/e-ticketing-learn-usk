@@ -34,7 +34,7 @@ export const createUserSchema = z.object({
     .regex(/[a-z]/, "Password harus mengandung huruf kecil")
     .regex(/[0-9]/, "Password harus mengandung angka"),
   email: z.string().email(),
-  role: z.enum(["ADMIN", "USER", "MASKAPAI"]),
+  role: z.enum(["Admin", "User", "Maskapai"]),
 });
 
 export type LoginForm = z.infer<typeof loginSchema>;

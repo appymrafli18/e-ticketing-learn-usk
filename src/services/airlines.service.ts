@@ -7,9 +7,9 @@ import path from "path";
 const airlineServices = {
   getAllAirlines: async (user: IPayload) => {
     try {
-      const response = await prisma_connection.tbl_airlines.findMany({
+      const response = await prisma_connection.airlines.findMany({
         where: {
-          ...(user.role === "MASKAPAI" && { userId: user.id }),
+          ...(user.role === "Maskapai" && { userId: user.id }),
         },
         omit: {
           userId: true,
@@ -37,12 +37,13 @@ const airlineServices = {
       };
     }
   },
+
   getSelectedAirlines: async (uuid: string, user: IPayload) => {
     try {
-      const response = await prisma_connection.tbl_airlines.findUnique({
+      const response = await prisma_connection.airlines.findUnique({
         where: {
           uuid,
-          ...(user.role === "MASKAPAI" && { userId: user.id }),
+          ...(user.role === "Maskapai" && { userId: user.id }),
         },
         omit: {
           userId: true,
@@ -69,8 +70,9 @@ const airlineServices = {
       };
     }
   },
+
   createAirlines: async (body: IBodyAirlines, user: IPayload) => {
-    if (user.role === "USER")
+    if (user.role === "User")
       return { statusCode: 401, message: "Unauthorized" };
 
     try {
@@ -94,7 +96,7 @@ const airlineServices = {
       if (file.length > 1)
         return { statusCode: 400, message: "Image is required" };
 
-      await prisma_connection.tbl_airlines.create({
+      await prisma_connection.airlines.create({
         data: {
           name: body.name,
           logo: fileName,
@@ -121,12 +123,13 @@ const airlineServices = {
       };
     }
   },
+
   updateAirlines: async (uuid: string, body: IBodyAirlines, user: IPayload) => {
-    if (user.role === "USER")
+    if (user.role === "User")
       return { statusCode: 401, message: "Unauthorized" };
 
     try {
-      const search = await prisma_connection.tbl_airlines.findUnique({
+      const search = await prisma_connection.airlines.findUnique({
         where: {
           uuid,
         },
@@ -157,7 +160,7 @@ const airlineServices = {
         fs.writeFileSync(filePath, Buffer.from(await file.arrayBuffer()));
       }
 
-      await prisma_connection.tbl_airlines.update({
+      await prisma_connection.airlines.update({
         where: { id: search.id },
         data: {
           name: body.name || search.name,
@@ -177,12 +180,13 @@ const airlineServices = {
       };
     }
   },
+
   deleteAirlines: async (uuid: string, user: IPayload) => {
-    if (user.role !== "ADMIN")
+    if (user.role !== "Admin")
       return { statusCode: 401, message: "Unauthorized" };
 
     try {
-      const search = await prisma_connection.tbl_airlines.findUnique({
+      const search = await prisma_connection.airlines.findUnique({
         where: {
           uuid,
         },
@@ -190,7 +194,7 @@ const airlineServices = {
 
       if (!search) return { statusCode: 404, message: "Airlines not found" };
 
-      await prisma_connection.tbl_airlines.delete({
+      await prisma_connection.airlines.delete({
         where: {
           id: search.id,
         },

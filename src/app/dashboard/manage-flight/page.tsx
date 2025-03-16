@@ -118,7 +118,7 @@ const Page: React.FC = () => {
                 <th className="py-2 px-4 border-b">Waktu Keberangkatan</th>
                 <th className="py-2 px-4 border-b">Waktu Kedatangan</th>
                 <th className="py-2 px-4 border-b">Harga</th>
-                <th className="py-2 px-4 border-b">Kapasitas Kursi</th>
+              <th className="py-2 px-4 border-b">Kapasitas Kursi</th>
                 <th className="py-2 px-4 border-b">Kursi Tersedia</th>
                 <th className="py-2 px-4 border-b">Actions</th>
               </tr>

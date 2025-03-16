@@ -8,7 +8,7 @@ export async function middleware(req: NextRequest) {
     // const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     // const { payload } = await jwtVerify(getToken, secret);
 
-    // if (payload.role === "USER")
+    // if (payload.role === "User")
     //   return NextResponse.redirect(new URL("/", req.url));
     return null;
   }

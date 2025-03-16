@@ -1,5 +1,6 @@
 import { USER } from "@/types/user";
 import React from "react";
+import TempLoader from "../TempLoader";
 
 interface UserTableProps {
   users: USER[] | null;
@@ -15,37 +16,40 @@ const UserTable: React.FC<UserTableProps> = ({
   onDelete,
 }) => {
   return (
-    <div className="overflow-x-auto card">
-      <table className="min-w-full shadow-md rounded-lg text-center">
-        <thead className="border-b border-[var(--text)]">
-          <tr>
-            <th className="py-2 px-4">Username</th>
-            <th className="py-2 px-4">Name</th>
-            <th className="py-2 px-4">Email</th>
-            <th className="py-2 px-4">Role</th>
-            <th className="py-2 px-4">Actions</th>
+    <div className="overflow-x-auto">
+      <table className="min-w-full border border-gray-300 bg-white">
+        <thead>
+          <tr className="bg-gray-200 text-sm leading-normal text-gray-600 uppercase">
+            <th className="px-6 py-3 text-left">No</th>
+            <th className="px-6 py-3 text-left">Nama</th>
+            <th className="px-6 py-3 text-left">Email</th>
+            <th className="px-6 py-3 text-left">Role</th>
+            <th className="px-6 py-3 text-center">Action</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-sm font-light text-gray-600">
           {users &&
-            users.map((user) => (
-              <tr key={user.id}>
-                <td className="py-2 px-4">{user.username}</td>
-                <td className="py-2 px-4">{user.name}</td>
-                <td className="py-2 px-4">{user.email}</td>
-                <td className="py-2 px-4">{user.role}</td>
-                <td className="py-2 px-4">
+            users.map((user, index) => (
+              <tr
+                className="border-b border-gray-200 hover:bg-gray-100"
+                key={index}
+              >
+                <td className="px-6 py-3 text-left whitespace-nowrap">
+                  {index + 1}
+                </td>
+                <td className="px-6 py-3 text-left">{user.name}</td>
+                <td className="px-6 py-3 text-left">{user.email}</td>
+                <td className="px-6 py-3 text-left">{user.role}</td>
+                <td className="px-6 py-3 text-center">
                   <button
                     onClick={() => onEdit(user)}
-                    className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-600"
+                    className="rounded bg-blue-500 px-4 mx-2 py-1 text-white"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => {
-                      onDelete(user.uuid);
-                    }}
-                    className="bg-red-500 text-white px-2 py-1 mr-2 rounded hover:bg-red-600"
+                    onClick={() => onDelete(user.uuid as string)}
+                    className="rounded bg-red-500 mx-2 px-4 py-1 text-white"
                   >
                     Delete
                   </button>
@@ -54,7 +58,7 @@ const UserTable: React.FC<UserTableProps> = ({
             ))}
         </tbody>
       </table>
-      {loading && <div className="text-center">Loading...</div>}
+      {loading && <TempLoader />}
     </div>
   );
 };

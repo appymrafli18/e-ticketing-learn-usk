@@ -2,7 +2,7 @@ import { prisma_connection } from "@/lib/prisma-orm";
 import argon2 from "argon2";
 
 async function main() {
-  const admin = await prisma_connection.tbl_user.findUnique({
+  const admin = await prisma_connection.user.findUnique({
     where: {
       username: "admin",
     },
@@ -11,13 +11,13 @@ async function main() {
   const hashingPassword = await argon2.hash(process.env.ADMIN_PASS!);
 
   if (!admin) {
-    await prisma_connection.tbl_user.create({
+    await prisma_connection.user.create({
       data: {
         name: "admin",
         username: "admin",
         email: "admin@gmail.com",
         password: hashingPassword,
-        role: "ADMIN",
+        role: "Admin",
       },
     });
     console.log("ADMIN CREATED!");
@@ -26,13 +26,13 @@ async function main() {
   // generate maskapai
   for (let i = 1; i <= 5; i++) {
     const hashingPassword = await argon2.hash(`maskapai`);
-    await prisma_connection.tbl_user.create({
+    await prisma_connection.user.create({
       data: {
         name: `Maskapai ${i}`,
         username: `maskapai${i}`,
         email: `maskapai${i}@gmail.com`,
         password: hashingPassword,
-        role: "MASKAPAI",
+        role: "Maskapai",
       },
     });
     console.log(`MASKAPAI ${i} CREATED!`);
@@ -41,13 +41,13 @@ async function main() {
   // generate user
   for (let i = 1; i <= 5; i++) {
     const hashingPassword = await argon2.hash(`users`);
-    await prisma_connection.tbl_user.create({
+    await prisma_connection.user.create({
       data: {
         name: `User ${i}`,
         username: `user${i}`,
         email: `user${i}@gmail.com`,
         password: hashingPassword,
-        role: "USER",
+        role: "User",
       },
     });
     console.log(`USER ${i} CREATED!`);
@@ -55,15 +55,15 @@ async function main() {
 
   // generate airlines
   for (let i = 1; i <= 5; i++) {
-    const searchMaskapai = await prisma_connection.tbl_user.findFirst({
+    const searchMaskapai = await prisma_connection.user.findFirst({
       where: {
-        role: "MASKAPAI",
+        role: "Maskapai",
         email: `maskapai${i}@gmail.com`,
       },
     });
 
     if (searchMaskapai) {
-      await prisma_connection.tbl_airlines.create({
+      await prisma_connection.airlines.create({
         data: {
           name: `Airlines ${i}`,
           logo: `airlines${i}.png`,
@@ -72,14 +72,14 @@ async function main() {
       });
       console.log(`AIRLINES ${i} CREATED!`);
 
-      const searchAirlines = await prisma_connection.tbl_airlines.findFirst({
+      const searchAirlines = await prisma_connection.airlines.findFirst({
         where: {
           userId: searchMaskapai.id,
         },
       });
 
       if (searchAirlines) {
-        await prisma_connection.tbl_flights.create({
+        await prisma_connection.flights.create({
           data: {
             no_penerbangan: "CT12",
             kota_keberangkatan: "Jakarta",
@@ -99,22 +99,22 @@ async function main() {
 
   // generate bookings
   for (let i = 1; i <= 5; i++) {
-    const searchUser = await prisma_connection.tbl_user.findFirst({
+    const searchUser = await prisma_connection.user.findFirst({
       where: {
-        role: "USER",
+        role: "User",
         email: `user${i}@gmail.com`,
       },
     });
 
     if (searchUser) {
-      const searchFlight = await prisma_connection.tbl_flights.findFirst({
+      const searchFlight = await prisma_connection.flights.findFirst({
         where: {
           no_penerbangan: "CT12",
         },
       });
 
       if (searchFlight) {
-        await prisma_connection.tbl_bookings.create({
+        await prisma_connection.booking.create({
           data: {
             jumlah_kursi: 1,
             total_harga: searchFlight.harga.toNumber(),

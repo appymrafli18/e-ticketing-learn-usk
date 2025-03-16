@@ -5,7 +5,7 @@ import { IPayload } from "@/types/jwt";
 const bookingServices = {
   getAllBookings: async (user: IPayload) => {
     try {
-      const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
+      const searchAirlines = await prisma_connection.airlines.findUnique({
         where: {
           userId: user.id,
         },
@@ -14,13 +14,13 @@ const bookingServices = {
         },
       });
 
-      if (!searchAirlines && user.role === "MASKAPAI")
+      if (!searchAirlines && user.role === "Maskapai")
         return { statusCode: 404, message: "Airlines not found" };
 
       const airlinesId = searchAirlines?.id;
-      const response = await prisma_connection.tbl_bookings.findMany({
+      const response = await prisma_connection.booking.findMany({
         where: {
-          ...(user.role === "USER" && { userId: user.id }),
+          ...(user.role === "User" && { userId: user.id }),
           flight: {
             airlinesId: airlinesId,
           },
@@ -41,9 +41,10 @@ const bookingServices = {
       };
     }
   },
+
   getOneBooking: async (uuid: string, user: IPayload) => {
     try {
-      const searchAirlines = await prisma_connection.tbl_airlines.findUnique({
+      const searchAirlines = await prisma_connection.airlines.findUnique({
         where: {
           userId: user.id,
         },
@@ -52,14 +53,14 @@ const bookingServices = {
         },
       });
 
-      if (!searchAirlines && user.role === "MASKAPAI")
+      if (!searchAirlines && user.role === "Maskapai")
         return { statusCode: 404, message: "Airlines not found" };
 
       const airlinesId = searchAirlines?.id;
-      const response = await prisma_connection.tbl_bookings.findUnique({
+      const response = await prisma_connection.booking.findUnique({
         where: {
           uuid,
-          ...(user.role === "USER" && { userId: user.id }),
+          ...(user.role === "User" && { userId: user.id }),
           flight: {
             airlinesId: airlinesId,
           },
@@ -90,11 +91,12 @@ const bookingServices = {
       };
     }
   },
+
   createBookings: async (body: ICreateBooking, user: IPayload) => {
-    if (user.role === "MASKAPAI")
+    if (user.role === "Maskapai")
       return { statusCode: 401, message: "Unauthorized" };
     try {
-      const searchFlights = await prisma_connection.tbl_flights.findUnique({
+      const searchFlights = await prisma_connection.flights.findUnique({
         where: {
           uuid: body.flightId,
         },
@@ -107,10 +109,10 @@ const bookingServices = {
         jumlah_kursi: Number(body.jumlah_kursi),
         total_harga: searchFlights.harga.toNumber() * Number(body.jumlah_kursi),
         flightId: searchFlights.id,
-        userId: user.role === "ADMIN" ? (body.userId as number) : user.id,
+        userId: user.role === "Admin" ? (body.userId as number) : user.id,
       };
 
-      const searchBookings = await prisma_connection.tbl_bookings.findFirst({
+      const searchBookings = await prisma_connection.booking.findFirst({
         where: {
           flightId: data.flightId,
           userId: data.userId,
@@ -118,14 +120,14 @@ const bookingServices = {
       });
 
       if (searchBookings) {
-        await prisma_connection.tbl_bookings.update({
+        await prisma_connection.booking.update({
           data,
           where: {
             id: searchBookings.id,
           },
         });
       } else {
-        await prisma_connection.tbl_bookings.create({
+        await prisma_connection.booking.create({
           data: {
             userId: data.userId,
             jumlah_kursi: data.jumlah_kursi,
@@ -144,15 +146,16 @@ const bookingServices = {
       };
     }
   },
+
   updateBookings: async (
     body: ICreateBooking,
     uuid: string,
     user: IPayload
   ) => {
-    if (user.role === "MASKAPAI")
+    if (user.role === "Maskapai")
       return { statusCode: 401, message: "Unauthorized" };
     try {
-      const searchFlights = await prisma_connection.tbl_flights.findUnique({
+      const searchFlights = await prisma_connection.flights.findUnique({
         where: {
           uuid: body.flightId,
         },
@@ -169,10 +172,10 @@ const bookingServices = {
           message: "Jumlah kursi melebihi kapasitas kursi",
         };
 
-      const searchBookings = await prisma_connection.tbl_bookings.findUnique({
+      const searchBookings = await prisma_connection.booking.findUnique({
         where: {
           uuid,
-          ...(user.role === "USER" && { userId: user.id }),
+          ...(user.role === "User" && { userId: user.id }),
         },
       });
 
@@ -183,10 +186,10 @@ const bookingServices = {
         jumlah_kursi: Number(body.jumlah_kursi),
         total_harga: searchFlights.harga.toNumber() * Number(body.jumlah_kursi),
         flightId: searchFlights.id,
-        userId: user.role === "ADMIN" ? (body.userId as number) : user.id,
+        userId: user.role === "Admin" ? (body.userId as number) : user.id,
       };
 
-      await prisma_connection.tbl_bookings.update({
+      await prisma_connection.booking.update({
         where: {
           id: searchBookings.id,
         },
@@ -202,20 +205,21 @@ const bookingServices = {
       };
     }
   },
+
   deleteBookings: async (uuid: string, user: IPayload) => {
-    if (user.role === "MASKAPAI")
+    if (user.role === "Maskapai")
       return { statusCode: 401, message: "Unauthorized" };
     try {
-      const search = await prisma_connection.tbl_bookings.findUnique({
+      const search = await prisma_connection.booking.findUnique({
         where: {
           uuid,
-          ...(user.role === "USER" && { userId: user.id }),
+          ...(user.role === "User" && { userId: user.id }),
         },
       });
 
       if (!search) return { statusCode: 404, message: "Bookings not found" };
 
-      await prisma_connection.tbl_bookings.delete({
+      await prisma_connection.booking.delete({
         where: {
           id: search.id,
         },

@@ -1,39 +1,49 @@
 "use client";
 import { ErrorAxios } from "@/lib/axios-error";
-import { RegisterForm, userSchema } from "@/lib/validation-user";
-import axios from "axios";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
+import { REGISTER } from "@/types/user";
+import FormComponent from "@/components/form/FormComponent";
+import InputField from "@/components/input/InputField";
+import axios from "axios";
 
 const Page = () => {
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting, isLoading },
-  } = useForm<RegisterForm>({
-    resolver: zodResolver(userSchema),
-  });
+  const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const onSubmit = async (data: RegisterForm) => {
-    console.log("submit data ...", data);
-    setErrorMessage("");
+  const initialValues: REGISTER = {
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  };
+
+  const handleSubmit = async (data: REGISTER) => {
+    setErrorMessage({});
+    setLoading(true);
+    console.log("submitted:", data);
 
     try {
       const response = await axios.post("/api/auth/register", data);
+
       if (response.status === 201) {
-        toast.success("Berhasil Login");
+        toast.success("Berhasil Register");
         setTimeout(() => {
           window.location.href = "/login";
         }, 1500);
       }
-      console.log("BERHASIL LOGIN", response);
     } catch (error) {
       const err = ErrorAxios(error);
-      setErrorMessage(err);
+
+      if (typeof err === "object") {
+        setErrorMessage(err as Record<string, string>);
+      } else {
+        setErrorMessage({ error: err });
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,102 +55,73 @@ const Page = () => {
             Sign Up
           </h2>
 
-          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name
-              </label>
-              <input
-                type="text"
-                className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                placeholder="your@email.com"
-                {...register("name")}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-xs mt-2">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Username
-              </label>
-              <input
-                type="text"
-                className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                placeholder="your@email.com"
-                {...register("username")}
-              />
-              {errors.username && (
-                <p className="text-red-500 text-xs mt-2">
-                  {errors.username.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                placeholder="your@email.com"
-                {...register("email")}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-2">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                placeholder="••••••••"
-                {...register("password")}
-              />
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-2">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                placeholder="••••••••"
-                {...register("confirmPassword")}
-              />
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-xs mt-2">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-            <div className="hidden">{errorMessage}</div>
+          <FormComponent<REGISTER>
+            initialValues={initialValues}
+            onSubmit={handleSubmit}
+            buttonLoading={loading}
+            submitLabel="Sign Up"
+            buttonStyle="w-full mt-2"
+          >
+            {({ formData, handleChange }) => (
+              <>
+                <InputField
+                  label="Name"
+                  name="name"
+                  onChange={handleChange}
+                  value={formData.name}
+                  errors={errorMessage?.name}
+                  required
+                  inputStyle="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                  placeholder="Masukkan Nama Kamu"
+                />
+                <InputField
+                  label="Username"
+                  name="username"
+                  onChange={handleChange}
+                  value={formData.username}
+                  errors={errorMessage?.username}
+                  required
+                  inputStyle="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                  placeholder="Masukkan Username Kamu"
+                />
+                <InputField
+                  label="Email"
+                  name="email"
+                  onChange={handleChange}
+                  value={formData.email}
+                  errors={errorMessage?.email}
+                  required
+                  type="email"
+                  inputStyle="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                  placeholder="Masukkan Email Kamu"
+                />
+                <InputField
+                  label="Password"
+                  name="password"
+                  onChange={handleChange}
+                  value={formData.password}
+                  errors={errorMessage?.password}
+                  required
+                  type="password"
+                  inputStyle="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                  placeholder="Masukkan Password Kamu"
+                />
+                <InputField
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  onChange={handleChange}
+                  value={formData.confirmPassword}
+                  errors={errorMessage?.confirmPassword}
+                  required
+                  type="password"
+                  inputStyle="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                  placeholder="Masukkan Confirm Password Kamu"
+                />
+              </>
+            )}
+          </FormComponent>
 
-            <button
-              disabled={isLoading}
-              className={`w-full text-white font-medium py-2.5 rounded-lg transition-colors ${
-                isSubmitting
-                  ? "bg-indigo-300"
-                  : "bg-indigo-600 hover:bg-indigo-700"
-              }`}
-            >
-              Register
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="mt-4 text-center text-sm text-gray-600">
             Dont have an account?
             <Link
               href="/login"

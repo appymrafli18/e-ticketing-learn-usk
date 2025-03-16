@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 export const authService = {
   generateToken: (payload: object) =>
     jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: "1h" }),
+
   verifyToken: (token: string) => {
     try {
       return jwt.verify(token, process.env.JWT_SECRET!);
@@ -17,6 +18,7 @@ export const authService = {
       return error instanceof Error ? null : null;
     }
   },
+  
   registerAccount: async (body: REGISTER) => {
     try {
       const { error, data } = userSchema.safeParse(body);
@@ -29,7 +31,7 @@ export const authService = {
         };
 
       // 🔍 Cek duplikasi username atau email sebelum insert
-      const existingUser = await prisma_connection.tbl_user.findFirst({
+      const existingUser = await prisma_connection.user.findFirst({
         where: { OR: [{ username: data.username }, { email: data.email }] },
         select: { username: true, email: true },
       });
@@ -51,7 +53,7 @@ export const authService = {
 
       const hashingPassword = await argon2.hash(data.password);
 
-      await prisma_connection.tbl_user.create({
+      await prisma_connection.user.create({
         data: {
           name: data.name,
           username: data.username,
@@ -69,6 +71,7 @@ export const authService = {
       };
     }
   },
+
   loginAccount: async (body: LOGIN, context: Context) => {
     try {
       const { error, data } = loginSchema.safeParse(body);
@@ -80,7 +83,7 @@ export const authService = {
           error: converterError(error),
         };
 
-      const user = await prisma_connection.tbl_user.findUnique({
+      const user = await prisma_connection.user.findUnique({
         where: { email: data.email },
       });
 

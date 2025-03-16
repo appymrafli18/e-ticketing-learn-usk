@@ -2,47 +2,109 @@
 
 import { USER } from "@/types/user";
 import { ChangeEvent, useState } from "react";
+import FormComponent from "../form/FormComponent";
+import InputField from "../input/InputField";
+import { SelectField } from "../input/SelectField";
 
 interface IEditUserProps {
   isOpen: boolean;
+  handleSubmit: (data: USER) => void;
   onClose: () => void;
-  onSave: (value: USER) => void;
+  errorMessage: Record<string, string>;
   loading: boolean;
   title: string;
 }
 
 export default function AddUser({
   isOpen,
+  handleSubmit,
   onClose,
-  onSave,
   loading,
+  errorMessage,
   title,
 }: IEditUserProps) {
-  const [value, setValue] = useState<USER>({
+  if (!isOpen) return null;
+
+  const initialValues: USER = {
     name: "",
     username: "",
     email: "",
-    role: "USER",
+    role: "User",
     password: "",
-  });
-
-  if (!isOpen) return null;
-
-  const onChangeValues = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    console.log(e.target.name);
-    console.log(e.target.value);
-    setValue((prev) => ({ ...prev, [e.target.name]: e.target.value } as USER));
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-[var(--card)] rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h2 className="text-lg font-semibold mb-4 text-[var(--text)]">
-          Add {title}
-        </h2>
-        <div>
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h2 className="text-lg font-semibold mb-4">Add {title}</h2>
+        <FormComponent<USER>
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          isCancel={true}
+          buttonLoading={loading}
+          onClose={onClose}
+        >
+          {({ formData, handleChange }) => (
+            <>
+              <InputField
+                label="Name"
+                name="name"
+                onChange={handleChange}
+                value={formData?.name}
+                required
+                errors={errorMessage?.name}
+                inputStyle="w-full"
+                placeholder="Masukkan Nama"
+              />
+              <InputField
+                label="Username"
+                name="username"
+                onChange={handleChange}
+                value={formData?.username as string}
+                errors={errorMessage?.username}
+                required
+                inputStyle="w-full"
+                placeholder="Masukkan username"
+              />
+              <InputField
+                label="Email"
+                name="email"
+                onChange={handleChange}
+                value={formData?.email}
+                required
+                errors={errorMessage?.email}
+                type="email"
+                inputStyle="w-full"
+                placeholder="Masukkan Nama"
+              />
+              <InputField
+                label="Password"
+                name="password"
+                onChange={handleChange}
+                value={formData?.password as string}
+                errors={errorMessage?.password}
+                required
+                type="password"
+                inputStyle="w-full"
+                placeholder="Masukkan Nama"
+              />
+              <SelectField
+                label="Role"
+                name="role"
+                value={formData?.role}
+                onChange={handleChange}
+                options={[
+                  { value: "Admin", label: "Admin" },
+                  { value: "User", label: "User" },
+                  { value: "Maskapai", label: "Maskapai" },
+                ]}
+                required
+              />
+            </>
+          )}
+        </FormComponent>
+        {errorMessage && <p className="text-red-500">{errorMessage?.error}</p>}
+        {/* <div>
           <label className="text-sm font-medium">Name</label>
           <input
             type="text"
@@ -112,7 +174,7 @@ export default function AddUser({
           >
             Save
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

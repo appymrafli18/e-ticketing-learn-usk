@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER', 'MASKAPAI');
+CREATE TYPE "Role" AS ENUM ('Admin', 'User', 'Maskapai');
 
 -- CreateEnum
 CREATE TYPE "Status" AS ENUM ('Pending', 'Confirmed', 'Canceled');
@@ -8,22 +8,22 @@ CREATE TYPE "Status" AS ENUM ('Pending', 'Confirmed', 'Canceled');
 CREATE TYPE "TypeReport" AS ENUM ('Transaksi', 'Penerbangan', 'Keuangan', 'Lainnya');
 
 -- CreateTable
-CREATE TABLE "tbl_user" (
+CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "uuid" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "email" TEXT NOT NULL,
     "password" VARCHAR(255) NOT NULL,
-    "role" "Role" NOT NULL DEFAULT 'USER',
+    "role" "Role" NOT NULL DEFAULT 'User',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "tbl_user_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "tbl_airlines" (
+CREATE TABLE "Airlines" (
     "id" SERIAL NOT NULL,
     "uuid" TEXT NOT NULL,
     "name" VARCHAR(100) NOT NULL,
@@ -32,11 +32,11 @@ CREATE TABLE "tbl_airlines" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "tbl_airlines_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Airlines_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "tbl_flights" (
+CREATE TABLE "Flights" (
     "id" SERIAL NOT NULL,
     "uuid" TEXT NOT NULL,
     "no_penerbangan" TEXT NOT NULL,
@@ -51,11 +51,11 @@ CREATE TABLE "tbl_flights" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "airlinesId" INTEGER NOT NULL,
 
-    CONSTRAINT "tbl_flights_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Flights_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "tbl_bookings" (
+CREATE TABLE "Booking" (
     "id" SERIAL NOT NULL,
     "uuid" TEXT NOT NULL,
     "jumlah_kursi" INTEGER NOT NULL,
@@ -66,11 +66,11 @@ CREATE TABLE "tbl_bookings" (
     "flightId" INTEGER NOT NULL,
     "userId" INTEGER NOT NULL,
 
-    CONSTRAINT "tbl_bookings_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Booking_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "tbl_payments" (
+CREATE TABLE "Payment" (
     "id" SERIAL NOT NULL,
     "uuid" TEXT NOT NULL,
     "payment_method" TEXT NOT NULL,
@@ -80,11 +80,11 @@ CREATE TABLE "tbl_payments" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "bookingId" INTEGER NOT NULL,
 
-    CONSTRAINT "tbl_payments_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "tbl_reports" (
+CREATE TABLE "Reports" (
     "id" SERIAL NOT NULL,
     "uuid" TEXT NOT NULL,
     "type" "TypeReport" NOT NULL,
@@ -95,59 +95,59 @@ CREATE TABLE "tbl_reports" (
     "bookingId" INTEGER,
     "paymentId" INTEGER,
 
-    CONSTRAINT "tbl_reports_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Reports_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_user_uuid_key" ON "tbl_user"("uuid");
+CREATE UNIQUE INDEX "User_uuid_key" ON "User"("uuid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_user_username_key" ON "tbl_user"("username");
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_user_email_key" ON "tbl_user"("email");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_airlines_uuid_key" ON "tbl_airlines"("uuid");
+CREATE UNIQUE INDEX "Airlines_uuid_key" ON "Airlines"("uuid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_airlines_userId_key" ON "tbl_airlines"("userId");
+CREATE UNIQUE INDEX "Airlines_userId_key" ON "Airlines"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_flights_uuid_key" ON "tbl_flights"("uuid");
+CREATE UNIQUE INDEX "Flights_uuid_key" ON "Flights"("uuid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_bookings_uuid_key" ON "tbl_bookings"("uuid");
+CREATE UNIQUE INDEX "Booking_uuid_key" ON "Booking"("uuid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_payments_uuid_key" ON "tbl_payments"("uuid");
+CREATE UNIQUE INDEX "Payment_uuid_key" ON "Payment"("uuid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_payments_bookingId_key" ON "tbl_payments"("bookingId");
+CREATE UNIQUE INDEX "Payment_bookingId_key" ON "Payment"("bookingId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_reports_uuid_key" ON "tbl_reports"("uuid");
+CREATE UNIQUE INDEX "Reports_uuid_key" ON "Reports"("uuid");
 
 -- AddForeignKey
-ALTER TABLE "tbl_airlines" ADD CONSTRAINT "tbl_airlines_userId_fkey" FOREIGN KEY ("userId") REFERENCES "tbl_user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Airlines" ADD CONSTRAINT "Airlines_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tbl_flights" ADD CONSTRAINT "tbl_flights_airlinesId_fkey" FOREIGN KEY ("airlinesId") REFERENCES "tbl_airlines"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Flights" ADD CONSTRAINT "Flights_airlinesId_fkey" FOREIGN KEY ("airlinesId") REFERENCES "Airlines"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tbl_bookings" ADD CONSTRAINT "tbl_bookings_flightId_fkey" FOREIGN KEY ("flightId") REFERENCES "tbl_flights"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Booking" ADD CONSTRAINT "Booking_flightId_fkey" FOREIGN KEY ("flightId") REFERENCES "Flights"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tbl_bookings" ADD CONSTRAINT "tbl_bookings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "tbl_user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Booking" ADD CONSTRAINT "Booking_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tbl_payments" ADD CONSTRAINT "tbl_payments_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "tbl_bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "Booking"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tbl_reports" ADD CONSTRAINT "tbl_reports_userId_fkey" FOREIGN KEY ("userId") REFERENCES "tbl_user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Reports" ADD CONSTRAINT "Reports_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tbl_reports" ADD CONSTRAINT "tbl_reports_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "tbl_bookings"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Reports" ADD CONSTRAINT "Reports_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "Booking"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tbl_reports" ADD CONSTRAINT "tbl_reports_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "tbl_payments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Reports" ADD CONSTRAINT "Reports_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment"("id") ON DELETE SET NULL ON UPDATE CASCADE;

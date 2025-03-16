@@ -7,6 +7,8 @@ import toast, { Toaster } from "react-hot-toast";
 import useMe from "@/store/me";
 import AddAirlines from "@/components/modal/AddAirlines";
 import EditAirlines from "@/components/modal/EditAirlines";
+import Image from "next/image";
+import AirlinesTable from "@/components/table/AirlinesTable";
 
 interface IAirlines {
   id: number;
@@ -133,96 +135,8 @@ const Page: React.FC = () => {
       <div className="p-6">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Manage Airlines</h1>
-          {user?.role === "ADMIN" ||
-            (user?.role === "MASKAPAI" && (
-              <button
-                className="mr-2 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-md text-white"
-                onClick={onAdd}
-              >
-                Create
-              </button>
-            ))}
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="py-2 px-4 border-b">Name</th>
-                <th className="py-2 px-4 border-b">Logo</th>
-                <th className="py-2 px-4 border-b">User</th>
-                {user?.role === "ADMIN" ||
-                  (user?.role === "MASKAPAI" && (
-                    <th className="py-2 px-4 border-b">Actions</th>
-                  ))}
-              </tr>
-            </thead>
-            <tbody>
-              {airlines?.map((airline) => (
-                <tr key={airline.id} className="hover:bg-gray-50">
-                  <td className="py-2 px-4 border-b">{airline.name}</td>
-                  <td className="py-2 px-4 border-b">
-                    <img
-                      src={airline.logo}
-                      alt={airline.name}
-                      className="w-20 h-20 object-contain"
-                    />
-                  </td>
-                  <td className="py-2 px-4 border-b">{airline.user.name}</td>
-                  {user?.role === "ADMIN" ||
-                    (user?.role === "MASKAPAI" && (
-                      <td className="py-2 px-4 border-b">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => onEdit(airline)}
-                            className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => onDelete(airline.id)}
-                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {loading && (
-          <div className="text-center p-4">
-            <p>Loading...</p>
-          </div>
-        )}
-        {errorMessage && (
-          <p className="text-center p-4 text-red-500">{errorMessage}</p>
-        )}
-        {isAdd && user && user.id && (
-          <AddAirlines
-            isOpen={isAdd}
-            onClose={() => setIsAdd(false)}
-            onSave={onSave}
-            loading={loading}
-            userId={user.id}
-          />
-        )}
-        {isEdit && selectedAirline && user && user.id && (
-          <EditAirlines
-            isOpen={isEdit}
-            onClose={() => setIsEdit(false)}
-            onSave={onSaveEdit}
-            loading={loading}
-            userId={user.id}
-            initialValue={{
-              name: selectedAirline.name,
-              logo: selectedAirline.logo,
-              userId: user.id,
-            }}
-          />
-        )}
+        <AirlinesTable />
       </div>
     </LayoutDashboard>
   );
