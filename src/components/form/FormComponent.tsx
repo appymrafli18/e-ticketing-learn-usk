@@ -36,8 +36,11 @@ export default function FormComponent<T>({
   const [formData, setFormData] = useState<T>(initialValues);
 
   const handleChange = (event: IEventChange) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, type, files, value } = event.target as HTMLInputElement;
+
+    const fieldValue = type === "file" ? files?.[0] : value;
+
+    setFormData((prev) => ({ ...prev, [name]: fieldValue }));
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

@@ -11,13 +11,13 @@ import AddFlight from "@/components/modal/AddFlight";
 const Page: React.FC = () => {
   const [flights, setFlights] = useState<FLIGHT[] | null>(null);
   const [selectedFlight, setSelectedFlight] = useState<FLIGHT | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isAdd, setIsAdd] = useState<boolean>(false);
 
   const initialData = useCallback(async () => {
-    setErrorMessage("");
+    setErrorMessage({});
     setLoading(true);
 
     try {
@@ -25,11 +25,16 @@ const Page: React.FC = () => {
       if (response.status === 200 && response.data.data.length !== 0) {
         setFlights(response.data.data);
       } else {
-        setErrorMessage("Tidak memiliki data penerbangan");
+        setErrorMessage({ error: "Tidak memiliki data penerbangan" });
       }
     } catch (error) {
       const err = ErrorAxios(error);
-      setErrorMessage(err);
+
+      if (typeof err === "object") {
+        setErrorMessage(err as Record<string, string>);
+      } else {
+        setErrorMessage({ error: err });
+      }
     } finally {
       setLoading(false);
     }
@@ -65,7 +70,12 @@ const Page: React.FC = () => {
       }
     } catch (error) {
       const err = ErrorAxios(error);
-      setErrorMessage(err);
+
+      if (typeof err === "object") {
+        setErrorMessage(err as Record<string, string>);
+      } else {
+        setErrorMessage({ error: err });
+      }
     } finally {
       setTimeout(() => {
         setLoading(false);
@@ -74,6 +84,7 @@ const Page: React.FC = () => {
   };
 
   const onDelete = (uuid: string) => {
+    window.confirm("Berhasil Delete Penerbangan");
     axios
       .delete(`/api/flights/delete/${uuid}`)
       .then(() => {
@@ -118,7 +129,7 @@ const Page: React.FC = () => {
                 <th className="py-2 px-4 border-b">Waktu Keberangkatan</th>
                 <th className="py-2 px-4 border-b">Waktu Kedatangan</th>
                 <th className="py-2 px-4 border-b">Harga</th>
-              <th className="py-2 px-4 border-b">Kapasitas Kursi</th>
+                <th className="py-2 px-4 border-b">Kapasitas Kursi</th>
                 <th className="py-2 px-4 border-b">Kursi Tersedia</th>
                 <th className="py-2 px-4 border-b">Actions</th>
               </tr>
@@ -173,7 +184,7 @@ const Page: React.FC = () => {
           </div>
         )}
         {errorMessage && (
-          <p className="text-center p-4 text-red-500">{errorMessage}</p>
+          <p className="text-center p-4 text-red-500">{errorMessage.error}</p>
         )}
         {isOpen && (
           <EditFlight

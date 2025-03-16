@@ -77,6 +77,16 @@ const airlineServices = {
 
     try {
       if (!body.logo) return { statusCode: 400, message: "Image is required" };
+      if (user.role === "Maskapai") body.userId = user.id;
+
+      const search = await prisma_connection.airlines.findUnique({
+        where: {
+          userId: Number(body.userId),
+        },
+      });
+
+      if (search)
+        return { statusCode: 400, message: "Only one airlines per user" };
 
       const file = body.logo as File;
       const fileName = `${file.lastModified}-${file.name}`;
@@ -90,7 +100,7 @@ const airlineServices = {
       if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type))
         return {
           statusCode: 400,
-          message: "File type must be image PNG/JPEG/JPG",
+          message: "File type must be image png/jpeg/jpg",
         };
 
       if (file.length > 1)
@@ -100,7 +110,7 @@ const airlineServices = {
         data: {
           name: body.name,
           logo: fileName,
-          userId: user.id,
+          userId: search!.id,
         },
       });
 
@@ -112,7 +122,7 @@ const airlineServices = {
       fs.writeFileSync(filePath, Buffer.from(await file.arrayBuffer()));
 
       return {
-        statusCode: 200,
+        statusCode: 201,
         message: "Success created data airlines",
       };
     } catch (error) {

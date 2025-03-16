@@ -1,5 +1,6 @@
 export interface IAirlines {
   id: number;
+  uuid: string;
   name: string;
   logo: string | File;
   user: { id: number; name: string };
@@ -26,4 +27,5 @@ export interface IAirlinesAPI {
 export interface IBodyAirlines {
   name: string;
   logo: File;
+  userId?: number;
 }

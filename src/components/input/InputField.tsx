@@ -2,8 +2,8 @@ import { FormFieldProps } from "@/types/form";
 import React from "react";
 
 interface InputFieldProps extends FormFieldProps {
-  type?: "text" | "email" | "password" | "number" | "tel" | "date";
-  value: string | number;
+  type?: "text" | "email" | "password" | "number" | "tel" | "date" | "file";
+  value?: string | number;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   errors?: string;
@@ -36,7 +36,7 @@ export default function InputField({
         type={type}
         id={name}
         name={name}
-        value={value}
+        value={type === "file" ? undefined : value}
         autoComplete="off"
         onChange={onChange}
         placeholder={placeholder}

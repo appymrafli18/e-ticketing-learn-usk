@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { USER } from "@/types/user";
 import Image from "next/image";
-import { LayoutDashboard, TableProperties } from "lucide-react";
+import { Fan, LayoutDashboard, TableProperties } from "lucide-react";
 
 const listSidebar = [
   {
@@ -20,6 +20,7 @@ const listSidebar = [
   {
     url: "/dashboard/manage-airlines",
     title: "Manage Airlines",
+    icon: <Fan size={18} />,
     allowedRoles: ["Admin", "Maskapai"],
   },
   {

@@ -1,86 +1,137 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ErrorAxios } from "@/lib/axios-error";
+import FormComponent from "../form/FormComponent";
+import InputField from "../input/InputField";
+import axios from "axios";
+import { SelectField } from "../input/SelectField";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-interface IAirlines {
+interface IDataAirlines {
   name: string;
-  logo: string;
-  userId: number;
+  logo: File;
+  userId: string;
 }
 
 interface IAddAirlinesProps {
   isOpen: boolean;
-  onClose: () => void;
-  onSave: (value: IAirlines) => void;
   loading: boolean;
-  userId: number;
+  onClose: () => void;
+}
+
+interface IOption {
+  value: string;
+  label: string;
 }
 
 export default function AddAirlines({
   isOpen,
-  onClose,
-  onSave,
   loading,
-  userId,
+  onClose,
 }: IAddAirlinesProps) {
-  const [value, setValue] = useState<IAirlines>({
+  const [option, setOption] = useState<IOption[]>([]);
+  const [error, setError] = useState<Record<string, string>>({});
+
+  const initialValues: IDataAirlines = {
     name: "",
-    logo: "",
-    userId: userId,
-  });
+    logo: new File([], ""),
+    userId: "",
+  };
+
+  const handleSubmit = async (data: IDataAirlines) => {
+    console.log("submitted:", data);
+
+    try {
+      const response = await axios.post("/api/airlines/create", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 201) {
+        toast.success("Berhasil Menambahkan Data Maskapai");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (error) {
+      const err = ErrorAxios(error);
+
+      console.log(err);
+
+      if (typeof err === "object") {
+        setError(err as Record<string, string>);
+      } else {
+        setError({ error: err });
+      }
+    }
+  };
+
+  useEffect(() => {
+    axios
+      .get("/api/user/all/Maskapai")
+      .then((res) => {
+        const mappedData = res.data.data.map(
+          (item: { id: number; name: string }) => ({
+            value: item.id.toString(),
+            label: item.name,
+          })
+        );
+        setOption(mappedData);
+        if (option.length === 0) return null;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [option.length]);
 
   if (!isOpen) return null;
 
-  const onChangeValues = (e: ChangeEvent<HTMLInputElement>) => {
-    setValue((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-[var(--card)] rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h2 className="text-lg font-semibold mb-4 text-[var(--text)]">
-          Add Airlines
-        </h2>
-        <div>
-          <label className="text-sm font-medium">Name</label>
-          <input
-            type="text"
-            onChange={(e) => onChangeValues(e)}
-            name="name"
-            value={value.name}
-            className="w-full p-2 border-2 rounded-md mb-2 focus:outline-none text-black text-opacity-70 focus:ring-2 focus:ring-blue-500"
-            placeholder="Airlines Name..."
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Logo URL</label>
-          <input
-            type="text"
-            onChange={(e) => onChangeValues(e)}
-            name="logo"
-            value={value.logo}
-            className="w-full p-2 border-2 rounded-md mb-2 focus:outline-none text-black text-opacity-70 focus:ring-2 focus:ring-blue-500"
-            placeholder="Logo URL..."
-          />
-        </div>
-        <div className="flex justify-end space-x-2 mt-4">
-          <button
-            className="px-4 py-2 text-white rounded-md bg-red-500 hover:bg-red-700"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            disabled={loading || !value.name || !value.logo}
-            className={`px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 ${
-              (loading || !value.name || !value.logo) ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            onClick={() => onSave(value)}
-          >
-            Save
-          </button>
-        </div>
+      <div className="rounded-lg shadow-lg p-6 w-full max-w-md bg-white">
+        <h2 className="text-lg font-semibold mb-4">Add Airlines</h2>
+        <FormComponent<IDataAirlines>
+          isCancel={true}
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          onClose={onClose}
+          submitLabel="Save"
+          buttonLoading={loading}
+        >
+          {({ formData, handleChange }) => (
+            <>
+              <InputField
+                label="Name"
+                name="name"
+                onChange={handleChange}
+                value={formData?.name}
+                inputStyle="w-full"
+                placeholder="Masukkan Nama Airlines"
+                required
+              />
+              <InputField
+                label="Logo"
+                name="logo"
+                onChange={handleChange}
+                inputStyle="w-full"
+                placeholder="Masukkan Nama Airlines"
+                required
+                type="file"
+              />
+              <SelectField
+                label="Maskapai"
+                name="userId"
+                onChange={handleChange}
+                value={formData?.userId}
+                options={option}
+              />
+              {error.error && <p className="text-red-500">{error.error}</p>}
+            </>
+          )}
+        </FormComponent>
       </div>
     </div>
   );
-} 
+}

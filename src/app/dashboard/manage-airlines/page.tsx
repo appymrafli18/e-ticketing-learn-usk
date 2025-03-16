@@ -6,33 +6,21 @@ import { ErrorAxios } from "@/lib/axios-error";
 import toast, { Toaster } from "react-hot-toast";
 import useMe from "@/store/me";
 import AddAirlines from "@/components/modal/AddAirlines";
-import EditAirlines from "@/components/modal/EditAirlines";
-import Image from "next/image";
 import AirlinesTable from "@/components/table/AirlinesTable";
-
-interface IAirlines {
-  id: number;
-  name: string;
-  logo: string;
-  user: {
-    id: number;
-    name: string;
-  };
-}
+import { IAirlines } from "@/types/airlines";
+import EditAirlines from "@/components/modal/EditAirlines";
 
 const Page: React.FC = () => {
-  const [airlines, setAirlines] = useState<IAirlines[] | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [airlines, setAirlines] = useState<IAirlines[]>([]);
+  const [selectedAirlines, setSelectedAirlines] = useState<IAirlines>();
+  const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [isAdd, setIsAdd] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [selectedAirline, setSelectedAirline] = useState<IAirlines | null>(
-    null
-  );
   const { user } = useMe();
 
   const initialData = useCallback(async () => {
-    setErrorMessage("");
+    setErrorMessage({});
     setLoading(true);
 
     try {
@@ -40,86 +28,50 @@ const Page: React.FC = () => {
       if (response.status === 200 && response.data.data.length !== 0) {
         setAirlines(response.data.data);
       } else {
-        setErrorMessage("Tidak memiliki data maskapai");
+        setErrorMessage({ error: "Tidak memiliki data maskapai" });
       }
     } catch (error) {
       const err = ErrorAxios(error);
-      setErrorMessage(err);
+
+      if (typeof err === "object") {
+        setErrorMessage(err as Record<string, string>);
+      } else {
+        setErrorMessage({ error: err });
+      }
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const onAdd = () => {
-    setIsAdd(true);
-  };
-
-  const onEdit = (airline: IAirlines) => {
-    setSelectedAirline(airline);
+  const onEdit = (data: IAirlines) => {
     setIsEdit(true);
+    setSelectedAirlines(data);
   };
 
-  const onDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this airline?")) {
+  const handleDelete = async (uuid: string) => {
+    const isConfirm = window.confirm("Anda yakin ingin menghapus?");
+
+    if (isConfirm) {
+      console.log({ uuid });
+
       try {
-        await axios.delete(`/api/airlines/delete/${id}`);
-        toast.success("Berhasil Menghapus Maskapai");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+        const response = await axios.delete(`/api/airlines/delete/${uuid}`);
+
+        if (response.status === 200) {
+          toast.success("Berhasil Delete Maskapai");
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        }
       } catch (error) {
         const err = ErrorAxios(error);
-        setErrorMessage(err);
-      }
-    }
-  };
 
-  const onSave = async (values: {
-    name: string;
-    logo: string;
-    userId: number;
-  }) => {
-    setLoading(true);
-    try {
-      const response = await axios.post("/api/airlines/create", values);
-      if (response.status === 200) {
-        toast.success("Berhasil Menambahkan Maskapai");
-        setTimeout(() => {
-          setIsAdd(false);
-          window.location.reload();
-        }, 1500);
+        if (typeof err === "object") {
+          setErrorMessage(err as Record<string, string>);
+        } else {
+          setErrorMessage({ error: err });
+        }
       }
-    } catch (error) {
-      const err = ErrorAxios(error);
-      setErrorMessage(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onSaveEdit = async (values: {
-    name: string;
-    logo: string;
-    userId: number;
-  }) => {
-    setLoading(true);
-    try {
-      const response = await axios.put(
-        `/api/airlines/update/${selectedAirline?.id}`,
-        values
-      );
-      if (response.status === 200) {
-        toast.success("Berhasil Mengubah Maskapai");
-        setTimeout(() => {
-          setIsEdit(false);
-          window.location.reload();
-        }, 1500);
-      }
-    } catch (error) {
-      const err = ErrorAxios(error);
-      setErrorMessage(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -135,9 +87,38 @@ const Page: React.FC = () => {
       <div className="p-6">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Manage Airlines</h1>
+          {user && user.role === "Admin" && (
+            <button
+              className="mr-2 rounded bg-green-500 hover:bg-green-600 px-6 py-2 text-white"
+              onClick={() => setIsAdd(true)}
+            >
+              Create
+            </button>
+          )}
         </div>
-        <AirlinesTable />
+        <AirlinesTable
+          initialValues={airlines}
+          loading={loading}
+          onDelete={handleDelete}
+          onEdit={onEdit}
+        />
+        {errorMessage && <p className="text-center">{errorMessage.error}</p>}
       </div>
+      {isAdd && (
+        <AddAirlines
+          isOpen={isAdd}
+          loading={loading}
+          onClose={() => setIsAdd(false)}
+        />
+      )}
+      {isEdit && selectedAirlines && (
+        <EditAirlines
+          initialValue={selectedAirlines}
+          isOpen={isEdit}
+          loading={loading}
+          onClose={() => setIsEdit(false)}
+        />
+      )}
     </LayoutDashboard>
   );
 };
