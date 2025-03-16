@@ -17,7 +17,7 @@ const LayoutDashboard = ({
   return (
     <div className="flex min-h-screen">
       <Sidebar user={user} />
-      <div className="flex-1">
+      <div className="flex-1 overflow-x-hidden">
         <Navbar user={user} />
         {children}
       </div>

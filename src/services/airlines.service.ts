@@ -77,11 +77,18 @@ const airlineServices = {
 
     try {
       if (!body.logo) return { statusCode: 400, message: "Image is required" };
-      if (user.role === "Maskapai") body.userId = user.id;
+
+      if (user.role === "Maskapai") {
+        body.userId = user.id;
+      }
+
+      if (!body.userId) body.userId = user.id;
+
+      const userId = Number(body.userId) || user.id;
 
       const search = await prisma_connection.airlines.findUnique({
         where: {
-          userId: Number(body.userId),
+          userId,
         },
       });
 
@@ -110,7 +117,7 @@ const airlineServices = {
         data: {
           name: body.name,
           logo: fileName,
-          userId: search!.id,
+          userId,
         },
       });
 

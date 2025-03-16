@@ -2,7 +2,12 @@ import React from "react";
 import Link from "next/link";
 import { USER } from "@/types/user";
 import Image from "next/image";
-import { Fan, LayoutDashboard, TableProperties } from "lucide-react";
+import {
+  Fan,
+  LayoutDashboard,
+  PlaneTakeoff,
+  TableProperties,
+} from "lucide-react";
 
 const listSidebar = [
   {
@@ -26,6 +31,7 @@ const listSidebar = [
   {
     url: "/dashboard/manage-flight",
     title: "Flight",
+    icon: <PlaneTakeoff size={18} />,
     allowedRoles: ["Admin", "Maskapai"],
   },
   {
