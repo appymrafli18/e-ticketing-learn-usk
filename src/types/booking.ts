@@ -1,5 +1,3 @@
-import { FLIGHT } from "./flight";
-
 export interface ICreateBooking {
   jumlah_kursi: number;
   flightId: string;
@@ -12,8 +10,7 @@ export interface BOOKING {
   jumlah_kursi: number;
   total_harga: string;
   status: string;
-  createdAt: string;
-  updatedAt: string;
-  flightId: string;
-  flight?: FLIGHT;
+  user: {
+    name: string;
+  };
 }

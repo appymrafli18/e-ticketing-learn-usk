@@ -30,14 +30,16 @@ const paymentServices = {
             },
           },
         },
+        omit: {
+          bookingId: true,
+        },
         include: {
           booking: {
-            include: {
-              flight: {
-                omit: {
-                  kapasitas_kursi: true,
-                  kursi_tersedia: true,
-                  airlinesId: true,
+            select: {
+              status: true,
+              user: {
+                select: {
+                  name: true,
                 },
               },
             },
@@ -164,7 +166,7 @@ const paymentServices = {
       const data = {
         payment_method: body.payment_method,
         jumlah_pembayaran: body.jumlah_pembayaran,
-        status: (body.status as Status) || searchPayment.status,
+        status: body.status as Status,
       };
 
       if (body?.status && !(body.status in Status))
@@ -205,16 +207,25 @@ const paymentServices = {
             status: data.status,
           },
         });
+      } else if (body.status === "Canceled") {
+        await prisma_connection.booking.update({
+          where: {
+            id: searchPayment.bookingId,
+          },
+          data: {
+            status: data.status,
+          },
+        });
       }
 
-      const response = await prisma_connection.payment.update({
+      await prisma_connection.payment.update({
         where: {
           id: searchPayment.id,
         },
         data,
       });
 
-      return { statusCode: 200, message: "Success", data: response };
+      return { statusCode: 200, message: "Success Updated Payment" };
     } catch (error) {
       return {
         statusCode: 400,

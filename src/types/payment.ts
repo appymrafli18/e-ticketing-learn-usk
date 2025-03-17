@@ -37,8 +37,10 @@ export interface PAYMENT {
   payment_method: string;
   jumlah_pembayaran: string;
   status: string;
-  createdAt: string;
-  updatedAt: string;
-  bookingId: number;
-  booking: BOOKING;
+  booking: {
+    status: string;
+    user: {
+      name: string;
+    };
+  };
 }

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { USER } from "@/types/user";
 import Image from "next/image";
 import {
+  Bookmark,
+  DollarSign,
   Fan,
   LayoutDashboard,
   PlaneTakeoff,
@@ -35,14 +37,16 @@ const listSidebar = [
     allowedRoles: ["Admin", "Maskapai"],
   },
   {
-    url: "/dashboard/manage-payment",
-    title: "Payments",
-    allowedRoles: ["Admin", "User"],
-  },
-  {
     url: "/dashboard/manage-booking",
     title: "Booking",
-    allowedRoles: ["Admin", "Maskapai", "User"],
+    icon: <Bookmark size={18} />,
+    allowedRoles: ["Admin", "Maskapai"],
+  },
+  {
+    url: "/dashboard/manage-payment",
+    title: "Payments",
+    icon: <DollarSign size={18} />,
+    allowedRoles: ["Admin"],
   },
 ];
 

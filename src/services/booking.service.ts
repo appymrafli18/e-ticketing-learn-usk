@@ -27,6 +27,14 @@ const bookingServices = {
         },
         omit: {
           userId: true,
+          flightId: true,
+        },
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
 
