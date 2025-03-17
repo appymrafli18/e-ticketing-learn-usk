@@ -2,7 +2,7 @@ import { FormFieldProps } from "@/types/form";
 import React from "react";
 
 interface InputFieldProps extends FormFieldProps {
-  type?: "text" | "email" | "password" | "number" | "tel" | "date" | "file";
+  type?: "text" | "email" | "password" | "number" | "tel" | "date" | "file" | "datetime-local";
   value?: string | number;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;

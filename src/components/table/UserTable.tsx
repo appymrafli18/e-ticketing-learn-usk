@@ -5,6 +5,7 @@ import TempLoader from "../TempLoader";
 interface UserTableProps {
   users: USER[] | null;
   loading: boolean;
+  errorMessage: Record<string, string>;
   onEdit: (selectUser: USER) => void;
   onDelete: (uuid: string) => void;
 }
@@ -12,6 +13,7 @@ interface UserTableProps {
 const UserTable: React.FC<UserTableProps> = ({
   users,
   loading,
+  errorMessage,
   onEdit,
   onDelete,
 }) => {
@@ -27,36 +29,38 @@ const UserTable: React.FC<UserTableProps> = ({
             <th className="px-6 py-3 text-center">Action</th>
           </tr>
         </thead>
-        <tbody className="text-sm font-light text-gray-600">
-          {users &&
-            users.map((user, index) => (
-              <tr
-                className="border-b border-gray-200 hover:bg-gray-100"
-                key={index}
-              >
-                <td className="px-6 py-3 text-left whitespace-nowrap">
-                  {index + 1}
-                </td>
-                <td className="px-6 py-3 text-left">{user.name}</td>
-                <td className="px-6 py-3 text-left">{user.email}</td>
-                <td className="px-6 py-3 text-left">{user.role}</td>
-                <td className="px-6 py-3 text-center">
-                  <button
-                    onClick={() => onEdit(user)}
-                    className="rounded bg-blue-500 px-4 mx-2 py-1 text-white"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => onDelete(user.uuid as string)}
-                    className="rounded bg-red-500 mx-2 px-4 py-1 text-white"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-        </tbody>
+        {!errorMessage.error && (
+          <tbody className="text-sm font-light text-gray-600">
+            {users &&
+              users.map((user, index) => (
+                <tr
+                  className="border-b border-gray-200 hover:bg-gray-100"
+                  key={index}
+                >
+                  <td className="px-6 py-3 text-left whitespace-nowrap">
+                    {index + 1}
+                  </td>
+                  <td className="px-6 py-3 text-left">{user.name}</td>
+                  <td className="px-6 py-3 text-left">{user.email}</td>
+                  <td className="px-6 py-3 text-left">{user.role}</td>
+                  <td className="px-6 py-3 text-center">
+                    <button
+                      onClick={() => onEdit(user)}
+                      className="rounded bg-blue-500 px-4 mx-2 py-1 text-white"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => onDelete(user.uuid as string)}
+                      className="rounded bg-red-500 mx-2 px-4 py-1 text-white"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        )}
       </table>
       {loading && <TempLoader />}
     </div>

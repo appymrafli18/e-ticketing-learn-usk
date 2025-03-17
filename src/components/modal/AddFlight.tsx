@@ -1,8 +1,12 @@
 "use client";
-
 import { FLIGHT } from "@/types/flight";
 import FormComponent from "../form/FormComponent";
 import InputField from "../input/InputField";
+import getCurrentDateTime from "@/lib/nowDate";
+import { useState } from "react";
+import { ErrorAxios } from "@/lib/axios-error";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 interface IAddFlightProps {
   isOpen: boolean;
@@ -15,14 +19,14 @@ export default function AddFlight({
   onClose,
   loading,
 }: IAddFlightProps) {
-  if (!isOpen) return null;
+  const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
 
   const initialValues: FLIGHT = {
     no_penerbangan: "",
     kota_keberangkatan: "",
     kota_tujuan: "",
-    waktu_keberangkatan: "",
-    waktu_kedatangan: "",
+    waktu_keberangkatan: getCurrentDateTime().slice(0, 16),
+    waktu_kedatangan: getCurrentDateTime().slice(0, 16),
     harga: 0,
     kapasitas_kursi: 0,
     kursi_tersedia: 0,
@@ -30,10 +34,42 @@ export default function AddFlight({
 
   const handleSubmit = async (data: FLIGHT) => {
     console.log("submitted:", data);
+
+    const flightData = {
+      ...data,
+      waktu_keberangkatan: getCurrentDateTime(data.waktu_keberangkatan),
+      waktu_kedatangan: getCurrentDateTime(data.waktu_kedatangan),
+    };
+
+    try {
+      const response = await axios.post("/api/flights/create", flightData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 201) {
+        toast.success("Berhasil Menambahkan Data Flight");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (error) {
+      const err = ErrorAxios(error);
+
+      if (typeof err === "object") {
+        setErrorMessage(err as Record<string, string>);
+      } else {
+        setErrorMessage({ error: err });
+      }
+    }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <Toaster position="top-right" reverseOrder={false} />
       <div className="rounded-lg shadow-lg p-6 w-full max-w-md bg-white">
         <h2 className="text-lg font-semibold mb-4">Tambah Flight</h2>
 
@@ -80,7 +116,7 @@ export default function AddFlight({
                 value={formData.waktu_keberangkatan}
                 onChange={handleChange}
                 required
-                type="date"
+                type="datetime-local"
                 inputStyle="w-full"
                 placeholder="Masukkan Waktu Keberangkatan"
               />
@@ -90,7 +126,7 @@ export default function AddFlight({
                 value={formData.waktu_kedatangan}
                 onChange={handleChange}
                 required
-                type="date"
+                type="datetime-local"
                 inputStyle="w-full"
                 placeholder="Masukkan Waktu Kedatangan"
               />
@@ -121,6 +157,9 @@ export default function AddFlight({
                 inputStyle="w-full"
                 placeholder="Masukkan Kursi Tersedia"
               />
+              {errorMessage && (
+                <p className="text-left text-red-500">{errorMessage.error}</p>
+              )}
             </>
           )}
         </FormComponent>

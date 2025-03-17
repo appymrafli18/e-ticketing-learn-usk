@@ -137,6 +137,7 @@ const Page: React.FC = () => {
           loading={loading}
           onEdit={onEdit}
           onDelete={onDelete}
+          errorMessage={errorMessage}
         />
         <div>
           <Toaster position="top-right" reverseOrder={false} />

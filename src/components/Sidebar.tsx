@@ -24,7 +24,7 @@ const listSidebar = [
   },
   {
     url: "/dashboard/manage-airlines",
-    title: "Manage Airlines",
+    title: "Airlines",
     icon: <Fan size={18} />,
     allowedRoles: ["Admin", "Maskapai"],
   },

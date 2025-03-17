@@ -7,9 +7,16 @@ import TempLoader from "../TempLoader";
 interface IFlightTableProps {
   initialValues: FLIGHT[];
   loading: boolean;
+  onEdit: (data: FLIGHT) => void;
+  onDelete: (uuid: string) => void;
 }
 
-const FlightTable = ({ initialValues, loading }: IFlightTableProps) => {
+const FlightTable = ({
+  initialValues,
+  loading,
+  onEdit,
+  onDelete,
+}: IFlightTableProps) => {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border border-gray-300 bg-white table-auto">
@@ -68,10 +75,16 @@ const FlightTable = ({ initialValues, loading }: IFlightTableProps) => {
                 <td className="px-6 py-3 text-left">{item.kapasitas_kursi}</td>
                 <td className="px-6 py-3 text-left">{item.kursi_tersedia}</td>
                 <td className="px-6 py-3 text-center whitespace-nowrap">
-                  <button className="rounded bg-blue-500 px-4 mx-2 py-1 text-white">
+                  <button
+                    className="rounded bg-blue-500 px-4 mx-2 py-1 text-white"
+                    onClick={() => onEdit(item)}
+                  >
                     Edit
                   </button>
-                  <button className="rounded bg-red-500 mx-2 px-4 py-1 text-white">
+                  <button
+                    className="rounded bg-red-500 mx-2 px-4 py-1 text-white"
+                    onClick={() => item.uuid && onDelete(item.uuid)}
+                  >
                     Delete
                   </button>
                 </td>

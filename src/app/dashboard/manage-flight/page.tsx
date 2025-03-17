@@ -1,16 +1,20 @@
 "use client";
 import LayoutDashboard from "@/components/LayoutDashboard";
 import AddFlight from "@/components/modal/AddFlight";
+import EditFlight from "@/components/modal/EditFlight";
 import FlightTable from "@/components/table/FlightTable";
 import { ErrorAxios } from "@/lib/axios-error";
 import { FLIGHT } from "@/types/flight";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 
 const Page: React.FC = () => {
   const [data, setData] = useState<FLIGHT[]>([]);
   const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
+  const [selectedData, setSelectedData] = useState<FLIGHT>();
   const [isAdd, setIsAdd] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const initialData = useCallback(async () => {
@@ -34,14 +38,28 @@ const Page: React.FC = () => {
     }
   }, []);
 
+  const onEdit = (data: FLIGHT) => {
+    setIsEdit(true);
+    setSelectedData(data);
+  };
+
+  const onDelete = (uuid: string) => {
+    axios.delete(`/api/flights/delete/${uuid}`).then(() => {
+      toast.success("Berhasil Delete Flight");
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    });
+  };
+
   useEffect(() => {
     initialData();
   }, [initialData]);
 
   return (
     <LayoutDashboard>
-      <div>{/* <Toaster position="top-right" reverseOrder={false} /> */}</div>
       <div className="p-6">
+        <Toaster position="top-right" reverseOrder={false} />
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Manage Flights</h1>
           <button
@@ -51,7 +69,12 @@ const Page: React.FC = () => {
             Create
           </button>
         </div>
-        <FlightTable initialValues={data} loading={loading} />
+        <FlightTable
+          initialValues={data}
+          loading={loading}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
 
         {errorMessage && (
           <p className="text-center p-4">{errorMessage?.error}</p>
@@ -60,6 +83,14 @@ const Page: React.FC = () => {
           <AddFlight
             isOpen={isAdd}
             onClose={() => setIsAdd(false)}
+            loading={loading}
+          />
+        )}
+        {selectedData && isEdit && (
+          <EditFlight
+            isOpen={isEdit}
+            initialValues={selectedData}
+            onClose={() => setIsEdit(false)}
             loading={loading}
           />
         )}

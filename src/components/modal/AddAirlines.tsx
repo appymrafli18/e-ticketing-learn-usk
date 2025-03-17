@@ -17,6 +17,7 @@ interface IDataAirlines {
 interface IAddAirlinesProps {
   isOpen: boolean;
   loading: boolean;
+  role: string;
   onClose: () => void;
 }
 
@@ -29,6 +30,7 @@ export default function AddAirlines({
   isOpen,
   loading,
   onClose,
+  role,
 }: IAddAirlinesProps) {
   const [option, setOption] = useState<IOption[]>([]);
   const [error, setError] = useState<Record<string, string>>({});
@@ -120,13 +122,15 @@ export default function AddAirlines({
                 required
                 type="file"
               />
-              <SelectField
-                label="Maskapai"
-                name="userId"
-                onChange={handleChange}
-                value={formData?.userId}
-                options={option}
-              />
+              {role === "Admin" && (
+                <SelectField
+                  label="Maskapai"
+                  name="userId"
+                  onChange={handleChange}
+                  value={formData?.userId}
+                  options={option}
+                />
+              )}
               {error.error && <p className="text-red-500">{error.error}</p>}
             </>
           )}

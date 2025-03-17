@@ -1,188 +1,163 @@
+"use client";
 import { FLIGHT } from "@/types/flight";
-import React from "react";
+import FormComponent from "../form/FormComponent";
+import InputField from "../input/InputField";
+import getCurrentDateTime from "@/lib/nowDate";
+import { useState } from "react";
+import { ErrorAxios } from "@/lib/axios-error";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
-interface Props {
+interface IEditFlightProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (values: FLIGHT) => void;
   loading: boolean;
-  initialValue: FLIGHT | null;
+  initialValues: FLIGHT;
 }
 
-const EditFlight: React.FC<Props> = ({
+export default function EditFlight({
   isOpen,
   onClose,
-  onSave,
   loading,
-  initialValue,
-}) => {
-  if (!isOpen) return null;
+  initialValues,
+}: IEditFlightProps) {
+  const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const values = {
-      ...initialValue,
-      no_penerbangan: formData.get("no_penerbangan") as string,
-      kota_keberangkatan: formData.get("kota_keberangkatan") as string,
-      kota_tujuan: formData.get("kota_tujuan") as string,
-      waktu_keberangkatan: formData.get("waktu_keberangkatan") as string,
-      waktu_kedatangan: formData.get("waktu_kedatangan") as string,
-      harga: formData.get("harga") as string,
-      kapasitas_kursi: parseInt(formData.get("kapasitas_kursi") as string),
-      kursi_tersedia: parseInt(formData.get("kursi_tersedia") as string),
-    };
-    onSave(values as FLIGHT);
+  const handleSubmit = async (data: FLIGHT) => {
+    console.log("submitted:", data);
+
+    delete data.id;
+
+    data.waktu_keberangkatan = getCurrentDateTime(data.waktu_keberangkatan);
+    data.waktu_kedatangan = getCurrentDateTime(data.waktu_kedatangan);
+
+    try {
+      const response = await axios.put(
+        `/api/flights/update/${data.uuid}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Berhasil Mengubah Data Flight");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (error) {
+      const err = ErrorAxios(error);
+
+      if (typeof err === "object") {
+        setErrorMessage(err as Record<string, string>);
+      } else {
+        setErrorMessage({ error: err });
+      }
+    }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="relative bg-white rounded-lg w-full max-w-md mx-4">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Edit Flight</h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <span className="sr-only">Close</span>
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <Toaster position="top-right" reverseOrder={false} />
+      <div className="rounded-lg shadow-lg p-6 w-full max-w-md bg-white">
+        <h2 className="text-lg font-semibold mb-4">Edit Flight</h2>
 
-          <form onSubmit={handleSubmit} className="mt-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  No Penerbangan
-                </label>
-                <input
-                  type="text"
-                  name="no_penerbangan"
-                  defaultValue={initialValue?.no_penerbangan}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Kota Keberangkatan
-                </label>
-                <input
-                  type="text"
-                  name="kota_keberangkatan"
-                  defaultValue={initialValue?.kota_keberangkatan}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Kota Tujuan
-                </label>
-                <input
-                  type="text"
-                  name="kota_tujuan"
-                  defaultValue={initialValue?.kota_tujuan}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Waktu Keberangkatan
-                </label>
-                <input
-                  type="datetime-local"
-                  name="waktu_keberangkatan"
-                  defaultValue={initialValue?.waktu_keberangkatan.split(".")[0]}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Waktu Kedatangan
-                </label>
-                <input
-                  type="datetime-local"
-                  name="waktu_kedatangan"
-                  defaultValue={initialValue?.waktu_kedatangan.split(".")[0]}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Harga
-                </label>
-                <input
-                  type="number"
-                  name="harga"
-                  defaultValue={initialValue?.harga}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Kapasitas Kursi
-                </label>
-                <input
-                  type="number"
-                  name="kapasitas_kursi"
-                  defaultValue={initialValue?.kapasitas_kursi}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Kursi Tersedia
-                </label>
-                <input
-                  type="number"
-                  name="kursi_tersedia"
-                  defaultValue={initialValue?.kursi_tersedia}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
-              >
-                {loading ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </form>
-        </div>
+        <FormComponent<FLIGHT>
+          initialValues={initialValues}
+          buttonLoading={loading}
+          onClose={onClose}
+          onSubmit={handleSubmit}
+          isCancel={true}
+          submitLabel="Simpan"
+        >
+          {({ formData, handleChange }) => (
+            <>
+              <InputField
+                label="No Penerbangan"
+                name="no_penerbangan"
+                value={formData.no_penerbangan}
+                onChange={handleChange}
+                required
+                inputStyle="w-full"
+                placeholder="Masukkan Nomor Penerbangan"
+              />
+              <InputField
+                label="Kota Keberangkatan"
+                name="kota_keberangkatan"
+                value={formData.kota_keberangkatan}
+                onChange={handleChange}
+                required
+                inputStyle="w-full"
+                placeholder="Masukkan Kota Keberangkatan"
+              />
+              <InputField
+                label="Kota Tujuan"
+                name="kota_tujuan"
+                value={formData.kota_tujuan}
+                onChange={handleChange}
+                required
+                inputStyle="w-full"
+                placeholder="Masukkan Kota Tujuan"
+              />
+              <InputField
+                label="Waktu Keberangkatan"
+                name="waktu_keberangkatan"
+                value={formData.waktu_keberangkatan.slice(0, 16)}
+                onChange={handleChange}
+                required
+                type="datetime-local"
+                inputStyle="w-full"
+                placeholder="Masukkan Waktu Keberangkatan"
+              />
+              <InputField
+                label="Waktu Kedatangan"
+                name="waktu_kedatangan"
+                value={formData.waktu_kedatangan.slice(0, 16)}
+                onChange={handleChange}
+                required
+                type="datetime-local"
+                inputStyle="w-full"
+                placeholder="Masukkan Waktu Kedatangan"
+              />
+              <InputField
+                label="Harga"
+                name="harga"
+                value={formData.harga}
+                onChange={handleChange}
+                required
+                inputStyle="w-full"
+                placeholder="Masukkan Harga"
+              />
+              <InputField
+                label="Kapasitas Kursi"
+                name="kapasitas_kursi"
+                value={formData.kapasitas_kursi}
+                onChange={handleChange}
+                required
+                inputStyle="w-full"
+                placeholder="Masukkan Kapasitas Kursi"
+              />
+              <InputField
+                label="Kursi Tersedia"
+                name="kursi_tersedia"
+                value={formData.kursi_tersedia}
+                onChange={handleChange}
+                required
+                inputStyle="w-full"
+                placeholder="Masukkan Kursi Tersedia"
+              />
+              {errorMessage && (
+                <p className="text-left text-red-500">{errorMessage.error}</p>
+              )}
+            </>
+          )}
+        </FormComponent>
       </div>
     </div>
   );
-};
-
-export default EditFlight; 
+}
