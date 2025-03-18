@@ -4,8 +4,13 @@ import { IParams } from "@/types/params";
 import { IPayment } from "@/types/payment";
 
 const paymentController = {
-  getAllPayment: async ({ store }: { store: { user: IPayload } }) =>
-    paymentServices.getAllPayments(store.user),
+  getAllPayment: async ({
+    params,
+    store,
+  }: {
+    params: { status: string };
+    store: { user: IPayload };
+  }) => paymentServices.getAllPayments(params.status,store.user),
   getOnePayment: async ({
     params,
     store,

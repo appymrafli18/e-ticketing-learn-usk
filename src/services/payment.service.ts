@@ -4,7 +4,7 @@ import { IPayment } from "@/types/payment";
 import { Status } from "@prisma/client";
 
 const paymentServices = {
-  getAllPayments: async (user: IPayload) => {
+  getAllPayments: async (type: string, user: IPayload) => {
     if (user.role === "Maskapai")
       return { statusCode: 401, message: "Unauthorized" };
     try {
@@ -23,6 +23,7 @@ const paymentServices = {
       const airlinesId = searchAirlines?.id;
       const response = await prisma_connection.payment.findMany({
         where: {
+          status: type as Status,
           booking: {
             ...(user.role === "User" && { userId: user.id }),
             flight: {

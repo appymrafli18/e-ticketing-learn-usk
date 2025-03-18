@@ -13,15 +13,20 @@ const Page: React.FC = () => {
   const [data, setData] = useState<PAYMENT[]>();
   const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(false);
+  const [selectStatus, setSelectStatus] = useState<string>("Pending");
 
   const initialValues = useCallback(async () => {
     setLoading(true);
     setErrorMessage({});
     try {
-      const response = await axios.get("/api/payments/all");
+      const response = await axios.get(`/api/payments/all/${selectStatus}`);
 
       if (response.status === 200) {
         setData(response.data.data);
+
+        if (response.data.data.length === 0) {
+          setErrorMessage({ error: `Tidak memiliki data pembayaran` });
+        }
       }
     } catch (error) {
       const err = ErrorAxios(error);
@@ -34,7 +39,7 @@ const Page: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectStatus]);
 
   const onConfirm = async (uuid: string) => {
     try {
@@ -83,6 +88,16 @@ const Page: React.FC = () => {
       <div className="p-6">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Payments</h1>
+          <select
+            name="type"
+            value={selectStatus}
+            onChange={(e) => setSelectStatus(e.target.value)}
+            className="block p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500"
+          >
+            <option value="Confirmed">Confirmed</option>
+            <option value="Pending">Pending</option>
+            <option value="Canceled">Canceled</option>
+          </select>
         </div>
         {data && (
           <PaymentsTable
@@ -91,6 +106,7 @@ const Page: React.FC = () => {
             loading={loading}
             onConfirm={onConfirm}
             onCancel={onCancel}
+            selectStatus={selectStatus}
           />
         )}
       </div>
