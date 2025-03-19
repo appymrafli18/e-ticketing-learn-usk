@@ -14,9 +14,15 @@ import {
 const listSidebar = [
   {
     url: "/dashboard",
-    title: "Dashboard",
+    title: "Dashboard Admin",
     icon: <LayoutDashboard size={18} />,
-    allowedRoles: ["Admin", "User", "Maskapai"],
+    allowedRoles: ["Admin"],
+  },
+  {
+    url: "/dashboard-maskapai",
+    title: "Dashboard Maskapai",
+    icon: <LayoutDashboard size={18} />,
+    allowedRoles: ["Maskapai"],
   },
   {
     url: "/dashboard/users",

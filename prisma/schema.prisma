@@ -22,7 +22,7 @@ enum Role {
 enum Status {
   Pending
   Confirmed
-  Canceled
+  Cancelled
 }
 
 enum TypeReport {

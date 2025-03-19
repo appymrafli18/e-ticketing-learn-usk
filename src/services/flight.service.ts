@@ -1,5 +1,5 @@
 import { prisma_connection } from "@/lib/prisma-orm";
-import { FLIGHT } from "@/types/flight";
+import { SelectFlight } from "@/types/flight";
 import { IPayload } from "@/types/jwt";
 
 const flightServices = {
@@ -19,9 +19,6 @@ const flightServices = {
           ...(user.role === "Maskapai" && {
             airlinesId: searchAirlines?.id,
           }),
-        },
-        omit: {
-          airlinesId: true,
         },
       });
 
@@ -61,6 +58,25 @@ const flightServices = {
               userId: true,
             },
           },
+          bookings: user.role !== "User" && {
+            where: {
+              status: "Confirmed",
+            },
+            omit: {
+              flightId: true,
+              userId: true,
+            },
+            include: {
+              user: {
+                omit: {
+                  password: true,
+                  role: true,
+                  createdAt: true,
+                  updatedAt: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -75,7 +91,7 @@ const flightServices = {
       };
     }
   },
-  createFlight: async (body: FLIGHT, user: IPayload) => {
+  createFlight: async (body: SelectFlight, user: IPayload) => {
     if (user.role === "User")
       return { statusCode: 401, message: "Unauthorized" };
     try {
@@ -89,7 +105,11 @@ const flightServices = {
         return { statusCode: 404, message: "Airlines not found" };
 
       const flightsData = {
-        ...body,
+        no_penerbangan: body.no_penerbangan,
+        kota_keberangkatan: body.kota_keberangkatan,
+        kota_tujuan: body.kota_tujuan,
+        waktu_keberangkatan: body.waktu_keberangkatan,
+        waktu_kedatangan: body.waktu_kedatangan,
         harga: Number(body.harga),
         kapasitas_kursi: Number(body.kapasitas_kursi),
         kursi_tersedia: Number(body.kursi_tersedia),
@@ -112,7 +132,7 @@ const flightServices = {
       };
     }
   },
-  updateFlight: async (body: FLIGHT, uuid: string, user: IPayload) => {
+  updateFlight: async (body: SelectFlight, uuid: string, user: IPayload) => {
     if (user.role === "User")
       return { statusCode: 401, message: "Unauthorized" };
     try {
@@ -129,12 +149,15 @@ const flightServices = {
         };
 
       const flightsData = {
-        ...body,
+        no_penerbangan: body.no_penerbangan,
+        kota_keberangkatan: body.kota_keberangkatan,
+        kota_tujuan: body.kota_tujuan,
+        waktu_keberangkatan: body.waktu_keberangkatan,
+        waktu_kedatangan: body.waktu_kedatangan,
         harga: Number(body.harga),
         kapasitas_kursi: Number(body.kapasitas_kursi),
         kursi_tersedia: Number(body.kursi_tersedia),
       };
-
       const searchFlights = await prisma_connection.flights.findUnique({
         where: {
           uuid,

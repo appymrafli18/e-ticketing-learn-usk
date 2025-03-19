@@ -19,7 +19,11 @@ const Page: React.FC = () => {
     setLoading(true);
     setErrorMessage({});
     try {
-      const response = await axios.get(`/api/payments/all/${selectStatus}`);
+      const response = await axios.get(`/api/payments/all`, {
+        data: {
+          type: selectStatus,
+        },
+      });
 
       if (response.status === 200) {
         setData(response.data.data);
@@ -61,7 +65,7 @@ const Page: React.FC = () => {
   const onCancel = async (uuid: string) => {
     try {
       const response = await axios.put(`/api/payments/update/${uuid}`, {
-        status: "Canceled",
+        status: "Cancelled",
       });
 
       if (response.status === 200) {
@@ -96,7 +100,7 @@ const Page: React.FC = () => {
           >
             <option value="Confirmed">Confirmed</option>
             <option value="Pending">Pending</option>
-            <option value="Canceled">Canceled</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
         </div>
         {data && (

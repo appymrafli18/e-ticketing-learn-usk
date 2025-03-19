@@ -36,7 +36,6 @@ const PaymentsTable = ({
         </thead>
         <tbody className="text-sm font-light text-gray-600">
           {initialValues.map((item, index) => {
-            // if (item.status === "Confirmed") return null;
             return (
               <tr
                 className="border-b border-gray-200 hover:bg-gray-100"

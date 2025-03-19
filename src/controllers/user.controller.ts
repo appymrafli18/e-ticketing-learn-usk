@@ -44,6 +44,14 @@ export const userController = {
     store: { user: IPayload };
   }) => await userServices.updateUser(params.uuid, body, user),
 
+  updateMe: async ({
+    body,
+    store: { user },
+  }: {
+    body: USER;
+    store: { user: IPayload };
+  }) => await userServices.updateMe(body, user),
+
   deleteUser: async ({
     params,
     store: { user },

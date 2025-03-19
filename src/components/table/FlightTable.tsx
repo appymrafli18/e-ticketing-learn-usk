@@ -1,4 +1,3 @@
-import convertDate from "@/lib/converterDate";
 import convertToRupiah from "@/lib/converterRupiah";
 import { FLIGHT } from "@/types/flight";
 import React from "react";
@@ -9,6 +8,7 @@ interface IFlightTableProps {
   loading: boolean;
   onEdit: (data: FLIGHT) => void;
   onDelete: (uuid: string) => void;
+  onDetail: (data: FLIGHT) => void;
 }
 
 const FlightTable = ({
@@ -16,6 +16,7 @@ const FlightTable = ({
   loading,
   onEdit,
   onDelete,
+  onDetail,
 }: IFlightTableProps) => {
   return (
     <div className="overflow-x-auto">
@@ -32,19 +33,8 @@ const FlightTable = ({
             <th className="px-6 py-3 text-left whitespace-nowrap">
               Kota Tujuan
             </th>
-            <th className="px-6 py-3 text-left whitespace-nowrap">
-              Waktu Keberangkatan
-            </th>
-            <th className="px-6 py-3 text-left whitespace-nowrap">
-              Waktu Kedatangan
-            </th>
             <th className="px-6 py-3 text-left whitespace-nowrap">Harga</th>
-            <th className="px-6 py-3 text-left whitespace-nowrap">
-              Kapasitas Kursi
-            </th>
-            <th className="px-6 py-3 text-left whitespace-nowrap">
-              Kursi Tersedia
-            </th>
+
             <th className="px-6 py-3 text-center">Action</th>
           </tr>
         </thead>
@@ -64,17 +54,15 @@ const FlightTable = ({
                 </td>
                 <td className="px-6 py-3 text-left">{item.kota_tujuan}</td>
                 <td className="px-6 py-3 text-left">
-                  {convertDate(item.waktu_keberangkatan)}
-                </td>
-                <td className="px-6 py-3 text-left">
-                  {convertDate(item.waktu_kedatangan)}
-                </td>
-                <td className="px-6 py-3 text-left">
                   {convertToRupiah(item.harga)}
                 </td>
-                <td className="px-6 py-3 text-left">{item.kapasitas_kursi}</td>
-                <td className="px-6 py-3 text-left">{item.kursi_tersedia}</td>
                 <td className="px-6 py-3 text-center whitespace-nowrap">
+                  <button
+                    className="rounded bg-green-500 px-4 mx-2 py-1 text-white"
+                    onClick={() => onDetail(item)}
+                  >
+                    Detail
+                  </button>
                   <button
                     className="rounded bg-blue-500 px-4 mx-2 py-1 text-white"
                     onClick={() => onEdit(item)}

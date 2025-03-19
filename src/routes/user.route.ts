@@ -31,6 +31,14 @@ userRoutes.put("/update/:uuid", userController.updateUser, {
     role: t.Optional(t.Enum(Role)),
   }),
 });
+userRoutes.put("/update/me", userController.updateMe, {
+  body: t.Object({
+    name: t.Optional(t.String()),
+    username: t.Optional(t.String()),
+    email: t.Optional(t.String()),
+    password: t.Optional(t.String()),
+  }),
+});
 userRoutes.delete("/delete/:uuid", userController.deleteUser);
 
 export default userRoutes;

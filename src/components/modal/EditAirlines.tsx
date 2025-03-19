@@ -4,10 +4,10 @@ import { ErrorAxios } from "@/lib/axios-error";
 import FormComponent from "../form/FormComponent";
 import InputField from "../input/InputField";
 import axios from "axios";
-import { SelectField } from "../input/SelectField";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { IAirlines } from "@/types/airlines";
+import useMe from "@/store/me";
 
 interface IDataAirlines {
   name: string;
@@ -36,12 +36,13 @@ export default function EditAirlines({
 }: IEditAirlinesProps) {
   const [option, setOption] = useState<IOption[]>([]);
   const [error, setError] = useState<Record<string, string>>({});
+  const { user } = useMe();
 
   const initialValues: IDataAirlines = {
-    name: initialValue.name,
-    uuid: initialValue.uuid,
+    name: initialValue?.name,
+    uuid: initialValue?.uuid,
     logo: new File([], ""),
-    userId: initialValue.user.id.toString(),
+    userId: initialValue?.user?.id?.toString(),
   };
 
   const handleSubmit = async (data: IDataAirlines) => {
@@ -76,22 +77,28 @@ export default function EditAirlines({
   };
 
   useEffect(() => {
-    axios
-      .get("/api/user/all/Maskapai")
-      .then((res) => {
-        const mappedData = res.data.data.map(
-          (item: { id: number; name: string }) => ({
-            value: item.id.toString(),
-            label: item.name,
+    const getAllMaskapai = () => {
+      if (user && user.role === "Admin") {
+        axios
+          .get("/api/user/all/Maskapai")
+          .then((res) => {
+            const mappedData = res.data.data.map(
+              (item: { id: number; name: string }) => ({
+                value: item.id.toString(),
+                label: item.name,
+              })
+            );
+            setOption(mappedData);
+            if (option.length === 0) return null;
           })
-        );
-        setOption(mappedData);
-        if (option.length === 0) return null;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [option.length]);
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    };
+
+    getAllMaskapai();
+  }, [option.length, user]);
 
   if (!isOpen) return null;
 

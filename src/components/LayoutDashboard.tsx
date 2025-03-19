@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import useMe from "@/store/me";
@@ -10,10 +10,29 @@ const LayoutDashboard = ({
   children: React.ReactNode;
 }>) => {
   const { user, setUser } = useMe();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setUser();
+    const fetchUser = async () => {
+      try {
+        await setUser();
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
   }, [setUser]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!user) return (window.location.href = "/login");
+
   return (
     <div className="flex min-h-screen">
       <Sidebar user={user} />
