@@ -1,6 +1,7 @@
 import React from "react";
 import TempLoader from "../TempLoader";
 import { PAYMENT } from "@/types/payment";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface PaymentsTableProps {
   initialValues: PAYMENT[];
@@ -57,19 +58,17 @@ const PaymentsTable = ({
                   </p>
                 </td>
                 {selectStatus === "Pending" && (
-                  <td className="px-6 py-3 text-center">
-                    <button
-                      className="rounded bg-green-500 px-4 mx-1 py-1 text-white"
+                  <td className="px-6 py-3 text-center flex gap-x-4">
+                    <CheckCircle
+                      width={20}
+                      className="text-green-500 hover:cursor-pointer"
                       onClick={() => onConfirm(item.uuid)}
-                    >
-                      Confirm
-                    </button>
-                    <button
-                      className="rounded bg-red-500 px-4 mx-1 py-1 text-white"
+                    />
+                    <XCircle
+                      width={20}
+                      className="text-red-500 hover:cursor-pointer"
                       onClick={() => onCancel(item.uuid)}
-                    >
-                      Reject
-                    </button>
+                    />
                   </td>
                 )}
               </tr>

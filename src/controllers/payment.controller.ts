@@ -5,14 +5,12 @@ import { IPayment } from "@/types/payment";
 
 const paymentController = {
   getAllPayment: async ({
-    body,
+    params,
     store,
   }: {
-    body: {
-      status: string;
-    }
+    params: IParams,
     store: { user: IPayload };
-  }) => paymentServices.getAllPayments(body,store.user),
+  }) => paymentServices.getAllPayments(params.uuid,store.user),
   getOnePayment: async ({
     params,
     store,

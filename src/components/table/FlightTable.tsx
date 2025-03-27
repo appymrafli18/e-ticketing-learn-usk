@@ -2,6 +2,7 @@ import convertToRupiah from "@/lib/converterRupiah";
 import { FLIGHT } from "@/types/flight";
 import React from "react";
 import TempLoader from "../TempLoader";
+import { Edit, Eye, Trash } from "lucide-react";
 
 interface IFlightTableProps {
   initialValues: FLIGHT[];
@@ -56,8 +57,8 @@ const FlightTable = ({
                 <td className="px-6 py-3 text-left">
                   {convertToRupiah(item.harga)}
                 </td>
-                <td className="px-6 py-3 text-center whitespace-nowrap">
-                  <button
+                <td className="px-6 py-3 text-center whitespace-nowrap flex justify-center gap-x-4">
+                  {/* <button
                     className="rounded bg-green-500 px-4 mx-2 py-1 text-white"
                     onClick={() => onDetail(item)}
                   >
@@ -74,7 +75,10 @@ const FlightTable = ({
                     onClick={() => item.uuid && onDelete(item.uuid)}
                   >
                     Delete
-                  </button>
+                  </button> */}
+                  <Eye width={20} className="text-green-500 hover:cursor-pointer" onClick={() => onDetail(item)}/>
+                  <Edit width={20} className="text-blue-500 hover:cursor-pointer" onClick={() => onEdit(item)}/>
+                  <Trash width={20} className="text-red-500 hover:cursor-pointer" onClick={() => item.uuid && onDelete(item.uuid)}/>
                 </td>
               </tr>
             ))}

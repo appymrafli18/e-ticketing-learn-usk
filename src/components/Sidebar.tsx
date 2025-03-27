@@ -6,6 +6,7 @@ import {
   Bookmark,
   DollarSign,
   Fan,
+  History,
   LayoutDashboard,
   PlaneTakeoff,
   TableProperties,
@@ -14,15 +15,9 @@ import {
 const listSidebar = [
   {
     url: "/dashboard",
-    title: "Dashboard Admin",
+    title: "Dashboard",
     icon: <LayoutDashboard size={18} />,
-    allowedRoles: ["Admin"],
-  },
-  {
-    url: "/dashboard-maskapai",
-    title: "Dashboard Maskapai",
-    icon: <LayoutDashboard size={18} />,
-    allowedRoles: ["Maskapai"],
+    allowedRoles: ["Admin", "Maskapai"],
   },
   {
     url: "/dashboard/users",
@@ -53,6 +48,12 @@ const listSidebar = [
     title: "Payments",
     icon: <DollarSign size={18} />,
     allowedRoles: ["Admin"],
+  },
+  {
+    url: "/dashboard",
+    title: "History",
+    icon: <History size={18} />,
+    allowedRoles: ["Admin", "Maskapai"],
   },
 ];
 

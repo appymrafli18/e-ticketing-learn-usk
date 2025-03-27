@@ -19,13 +19,10 @@ const Page: React.FC = () => {
     setLoading(true);
     setErrorMessage({});
     try {
-      const response = await axios.get(`/api/payments/all`, {
-        data: {
-          type: selectStatus,
-        },
-      });
+      const response = await axios.get(`/api/payments/all/${selectStatus}`);
 
       if (response.status === 200) {
+        console.log(response);
         setData(response.data.data);
 
         if (response.data.data.length === 0) {

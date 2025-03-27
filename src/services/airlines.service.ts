@@ -170,7 +170,9 @@ const airlineServices = {
             message: "File type must be image PNG/JPEG/JPG",
           };
 
-        fs.unlinkSync("public/img-airlines/" + search.logo);
+        if (fs.existsSync("public/img-airlines/" + search.logo)) {
+          fs.unlinkSync("public/img-airlines/" + search.logo);
+        }
 
         fileName = `${file.lastModified}-${file.name}`;
         const filePath = path.resolve("public/img-airlines/", fileName);

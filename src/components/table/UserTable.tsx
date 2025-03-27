@@ -1,6 +1,7 @@
 import { USER } from "@/types/user";
 import React from "react";
 import TempLoader from "../TempLoader";
+import { Edit, Trash } from "lucide-react";
 
 interface UserTableProps {
   users: USER[] | null;
@@ -43,19 +44,9 @@ const UserTable: React.FC<UserTableProps> = ({
                   <td className="px-6 py-3 text-left">{user.name}</td>
                   <td className="px-6 py-3 text-left">{user.email}</td>
                   <td className="px-6 py-3 text-left">{user.role}</td>
-                  <td className="px-6 py-3 text-center">
-                    <button
-                      onClick={() => onEdit(user)}
-                      className="rounded bg-blue-500 px-4 mx-2 py-1 text-white"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => onDelete(user.uuid as string)}
-                      className="rounded bg-red-500 mx-2 px-4 py-1 text-white"
-                    >
-                      Delete
-                    </button>
+                  <td className="px-6 py-3 text-center flex justify-center gap-x-4">
+                    <Edit width={20} className="text-blue-500 hover:cursor-pointer" onClick={() => onEdit(user)}/>
+                    <Trash width={20}  className="text-red-500 hover:cursor-pointer" onClick={() => onDelete(user.uuid as string)}/>
                   </td>
                 </tr>
               ))}

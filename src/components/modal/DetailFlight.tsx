@@ -2,6 +2,7 @@ import React from "react";
 import DetailModal from "./DetailModal";
 import { SelectFlight } from "@/types/flight";
 import convertToRupiah from "@/lib/converterRupiah";
+import Image from "next/image";
 
 interface DetailFlightProps {
   isOpen: boolean;
@@ -32,10 +33,12 @@ const DetailFlight: React.FC<DetailFlightProps> = ({
           <div>
             <p className="text-sm text-gray-500">Airlines</p>
             <div className="flex items-center gap-2">
-              <img
+              <Image
                 src={`/img-airlines/${flight.airlines.logo}`}
                 alt={flight.airlines.name}
                 className="w-8 h-8 object-contain"
+                width={20}
+                height={20}
               />
               <p className="font-medium text-gray-900">
                 {flight.airlines.name}
@@ -100,7 +103,7 @@ const DetailFlight: React.FC<DetailFlightProps> = ({
             <div className="space-y-3">
               {flight.bookings.map((booking, index) => (
                 <div key={index}>
-                  <div className="bg-gray-100 p-3 rounded-lg border" >
+                  <div className="bg-gray-100 p-3 rounded-lg border">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <p className="text-sm text-gray-500">Passenger Name</p>
