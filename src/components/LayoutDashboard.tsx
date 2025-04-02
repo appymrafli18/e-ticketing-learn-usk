@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import useMe from "@/store/me";
+import { useRouter } from "next/navigation";
 
 const LayoutDashboard = ({
   children,
@@ -11,17 +12,17 @@ const LayoutDashboard = ({
 }>) => {
   const { user, setUser } = useMe();
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        await setUser();
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, [setUser]);
+    if (!user) {
+      setUser();
+      setLoading(true);
+    } else {
+      if (user.role === "User") router.push("/");
+      setLoading(false);
+    }
+  }, [user, setUser, router]);
 
   if (loading) {
     return (
@@ -33,15 +34,17 @@ const LayoutDashboard = ({
 
   if (!user) return (window.location.href = "/login");
 
-  return (
-    <div className="flex min-h-screen">
-      <Sidebar user={user} />
-      <div className="flex-1 overflow-x-hidden">
-        <Navbar user={user} />
-        {children}
+  if (user.role !== "User") {
+    return (
+      <div className="flex min-h-screen">
+        <Sidebar user={user} />
+        <div className="flex-1 overflow-x-hidden">
+          <Navbar user={user} />
+          {children}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 };
 
 export default LayoutDashboard;

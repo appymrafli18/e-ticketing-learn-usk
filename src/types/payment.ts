@@ -16,6 +16,10 @@ export interface FLIGHT {
   harga: string;
   createdAt: string;
   updatedAt: string;
+  airlines?: {
+    name: string;
+    logo: string;
+  };
 }
 
 export interface BOOKING {

@@ -10,5 +10,6 @@ flightRoutes.post("/create", flightController.createFlight);
 flightRoutes.get("/select/:uuid", flightController.getFlightById);
 flightRoutes.put("/update/:uuid", flightController.updateFlight);
 flightRoutes.delete("/delete/:uuid", flightController.deleteFlight);
+flightRoutes.get("/filter", flightController.filterasiFlight);
 
 export default flightRoutes;

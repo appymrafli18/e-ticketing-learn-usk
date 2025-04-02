@@ -120,30 +120,23 @@ const bookingServices = {
         userId: user.role === "Admin" ? (body.userId as number) : user.id,
       };
 
-      const searchBookings = await prisma_connection.booking.findFirst({
+      await prisma_connection.flights.update({
         where: {
-          flightId: data.flightId,
-          userId: data.userId,
+          id: searchFlights.id,
+        },
+        data: {
+          kursi_tersedia: searchFlights.kursi_tersedia - data.jumlah_kursi,
         },
       });
 
-      if (searchBookings) {
-        await prisma_connection.booking.update({
-          data,
-          where: {
-            id: searchBookings.id,
-          },
-        });
-      } else {
-        await prisma_connection.booking.create({
-          data: {
-            userId: data.userId,
-            jumlah_kursi: data.jumlah_kursi,
-            flightId: data.flightId,
-            total_harga: data.total_harga,
-          },
-        });
-      }
+      await prisma_connection.booking.create({
+        data: {
+          userId: data.userId,
+          jumlah_kursi: data.jumlah_kursi,
+          flightId: data.flightId,
+          total_harga: data.total_harga,
+        },
+      });
 
       return { statusCode: 200, message: "Success", data };
     } catch (error) {

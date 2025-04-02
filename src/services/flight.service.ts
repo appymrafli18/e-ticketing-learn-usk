@@ -20,6 +20,17 @@ const flightServices = {
             airlinesId: searchAirlines?.id,
           }),
         },
+        omit: {
+          airlinesId: true,
+        },
+        include: {
+          airlines: {
+            select: {
+              name: true,
+              logo: true,
+            },
+          },
+        },
       });
 
       return { statusCode: 200, message: "Success", data: response };
@@ -31,6 +42,79 @@ const flightServices = {
       };
     }
   },
+
+  filterasiFlight: async (
+    airlinesName: string,
+    minPrice?: boolean,
+    maxPrice?: boolean,
+    departureCity?: string,
+    destinationCity?: string
+  ) => {
+    try {
+      const response = await prisma_connection.flights.findMany({
+        where: {
+          airlines: {
+            name: {
+              contains: airlinesName,
+              mode: "insensitive",
+            },
+          },
+          ...(departureCity && {
+            kota_keberangkatan: {
+              contains: departureCity,
+              mode: "insensitive",
+            },
+          }),
+          ...(destinationCity && {
+            kota_tujuan: {
+              contains: destinationCity,
+              mode: "insensitive",
+            },
+          }),
+        },
+        orderBy: {
+          ...(minPrice && {
+            harga: "asc",
+          }),
+          ...(maxPrice && {
+            harga: "desc",
+          }),
+          ...(!minPrice &&
+            !maxPrice && {
+              id: "asc",
+            }),
+        },
+        omit: {
+          airlinesId: true,
+        },
+        include: {
+          airlines: {
+            select: {
+              name: true,
+              logo: true,
+            },
+          },
+        },
+      });
+
+      if (response.length < 1) {
+        return {
+          statusCode: 404,
+          message: "Success",
+          data: "Flight Not Found",
+        };
+      }
+
+      return { statusCode: 200, message: "Success", data: response };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
   getFlightById: async (uuid: string, user: IPayload) => {
     try {
       const searchAirlines = await prisma_connection.airlines.findUnique({

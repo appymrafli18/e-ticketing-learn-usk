@@ -1,5 +1,5 @@
 import flightServices from "@/services/flight.service";
-import { IBodyFlight } from "@/types/flight";
+import { SelectFlight } from "@/types/flight";
 import { IPayload } from "@/types/jwt";
 import { IParams } from "@/types/params";
 
@@ -16,11 +16,33 @@ const flightController = {
     store: { user: IPayload };
   }) => flightServices.getFlightById(params.uuid, store.user),
 
+  filterasiFlight: async ({
+    query,
+  }: {
+    query: {
+      airlineName?: string;
+      minPrice?: boolean;
+      maxPrice?: boolean;
+      departureCity?: string;
+      destinationCity?: string;
+    };
+  }) => {
+    const { airlineName, minPrice, maxPrice, departureCity, destinationCity } =
+      query;
+    return flightServices.filterasiFlight(
+      airlineName || "",
+      minPrice,
+      maxPrice,
+      departureCity,
+      destinationCity
+    );
+  },
+
   createFlight: async ({
     body,
     store,
   }: {
-    body: IBodyFlight;
+    body: SelectFlight;
     store: { user: IPayload };
   }) => flightServices.createFlight(body, store.user),
 
@@ -30,7 +52,7 @@ const flightController = {
     store,
   }: {
     params: IParams;
-    body: IBodyFlight;
+    body: SelectFlight;
     store: { user: IPayload };
   }) => flightServices.updateFlight(body, params.uuid, store.user),
   deleteFlight: async ({
