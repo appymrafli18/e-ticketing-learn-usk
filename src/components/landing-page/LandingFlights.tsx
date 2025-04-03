@@ -7,11 +7,24 @@ import axios from "axios";
 import { IAirlines } from "@/types/airlines";
 import { FLIGHT } from "@/types/payment";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { ErrorAxios } from "@/lib/axios-error";
+
+interface ISorting {
+  sortPrice?: string;
+  sortAirlines?: {
+    name: string;
+    id: number;
+  };
+}
 
 const LandingFlights = () => {
   const { user, setUser } = useMe();
   const [airlines, setAirlines] = useState<IAirlines[]>([]);
   const [flights, setFlights] = useState<FLIGHT[]>([]);
+  const [errorMessage, setErrorMessage] = useState<Record<string, string>>();
+  const searchParams = useSearchParams();
+  const [sorting, setSorting] = useState<ISorting>();
 
   const checkLogin = useCallback(() => {
     if (!user) {
@@ -22,28 +35,60 @@ const LandingFlights = () => {
   const initialValue = async () => {
     try {
       const resAirlines = await axios.get("/api/airlines/all");
-      const resFlight = await axios.get("/api/flights/filter");
 
       if (resAirlines.status === 200) {
         setAirlines(resAirlines.data.data);
-      }
-
-      if (resFlight.status === 200) {
-        console.log(resFlight.data);
-        setFlights(resFlight.data.data);
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    checkLogin();
-  }, [checkLogin]);
+  const filterFlight = useCallback(async () => {
+    try {
+      const from = searchParams.get("from") as string;
+      const to = searchParams.get("to") as string;
+      const tanggal = searchParams.get("tanggal") as string;
 
-  useEffect(() => {
-    initialValue();
-  }, []);
+      const params = new URLSearchParams();
+      if (from) params.append("departureCity", from);
+      if (to) params.append("destinationCity", to);
+      if (tanggal) params.append("date", tanggal);
+      if (sorting && sorting.sortAirlines)
+        params.append("airlineName", sorting.sortAirlines.name);
+      if (sorting && sorting.sortPrice === "asc") params.append("minPrice", sorting.sortPrice);
+      if (sorting && sorting.sortPrice === "desc") params.append("maxPrice", sorting.sortPrice);
+
+      const resFlight = await axios.get(
+        `/api/flights/filter?${params.toString()}`
+      );
+      if (resFlight.status === 200) {
+        console.log({ rf: resFlight.data });
+        setFlights(resFlight.data.data);
+      }
+    } catch (error) {
+      const err = ErrorAxios(error);
+      if (typeof err !== "object") {
+        setErrorMessage({ error: err });
+      }
+    }
+  }, [searchParams, sorting]);
+
+  const handleSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const from = formData.get("from") as string;
+    const to = formData.get("to") as string;
+    const tanggal = formData.get("tanggal") as string;
+
+    const params = new URLSearchParams();
+    if (from) params.append("from", from);
+    if (to) params.append("to", to);
+    if (tanggal) params.append("tanggal", tanggal);
+
+    window.location.href = `/search-flights?${params}`;
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -52,6 +97,18 @@ const LandingFlights = () => {
       minimumFractionDigits: 0,
     }).format(price);
   };
+
+  useEffect(() => {
+    checkLogin();
+  }, [checkLogin]);
+
+  useEffect(() => {
+    filterFlight();
+  }, [filterFlight]);
+
+  useEffect(() => {
+    initialValue();
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -79,7 +136,11 @@ const LandingFlights = () => {
         {/* Search Bar */}
         <div className="container mx-auto px-4 relative -top-10">
           <div className="bg-white p-6 shadow-lg rounded-xl">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <form
+              action="POST"
+              onSubmit={handleSubmitForm}
+              className="grid grid-cols-1 md:grid-cols-4 gap-4"
+            >
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
                   From
@@ -101,9 +162,10 @@ const LandingFlights = () => {
                   </svg>
                   <input
                     type="text"
+                    defaultValue={searchParams.get("from") || ""}
+                    name="from"
                     placeholder="City or Airport"
                     className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue="Jakarta (CGK)"
                   />
                 </div>
               </div>
@@ -128,6 +190,8 @@ const LandingFlights = () => {
                   <input
                     type="text"
                     placeholder="City or Airport"
+                    defaultValue={searchParams.get("to") || ""}
+                    name="to"
                     className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -152,19 +216,25 @@ const LandingFlights = () => {
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
+
                   <input
                     type="date"
+                    name="tanggal"
+                    defaultValue={searchParams.get("tanggal") || ""}
                     className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div className="flex items-end">
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-200 font-medium">
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-200 font-medium"
+                >
                   Search Flights
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -188,6 +258,20 @@ const LandingFlights = () => {
                           <input
                             type="checkbox"
                             id={`airline-${airline.id}`}
+                            checked={
+                              (sorting?.sortAirlines &&
+                                sorting.sortAirlines.id === airline.id) ||
+                              false
+                            }
+                            onChange={() => {
+                              setSorting((prev) => ({
+                                ...prev,
+                                sortAirlines: {
+                                  id: airline.id,
+                                  name: airline.name,
+                                },
+                              }));
+                            }}
                             className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                           <div className="flex items-center space-x-2">
@@ -214,10 +298,13 @@ const LandingFlights = () => {
               </h2>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-500">Sort by:</span>
-                <select className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Not Sorting</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
+                <select
+                  value={sorting?.sortPrice}
+                  onChange={(e) => setSorting((prev) => ({...prev, sortPrice: e.target.value}))}
+                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option aria-disabled>Not Sorting</option>
+                  <option value="asc">Price: Low to High</option>
+                  <option value="desc">Price: High to Low</option>
                 </select>
               </div>
             </div>
@@ -338,12 +425,20 @@ const LandingFlights = () => {
               </div>
             ))}
 
+            {errorMessage && (
+              <p className="text-center font-bold text-xl">
+                {errorMessage.error}
+              </p>
+            )}
+
             {/* Load More Button */}
-            <div className="flex justify-center mt-8">
-              <button className="border border-blue-500 text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-md transition-colors duration-200 font-medium">
-                Load More Flights
-              </button>
-            </div>
+            {/* {!errorMessage && (
+              <div className="flex justify-center mt-8">
+                <button className="border border-blue-500 text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-md transition-colors duration-200 font-medium">
+                  Load More Flights
+                </button>
+              </div>
+            )} */}
           </div>
         </div>
       </main>

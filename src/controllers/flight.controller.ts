@@ -21,18 +21,27 @@ const flightController = {
   }: {
     query: {
       airlineName?: string;
-      minPrice?: boolean;
-      maxPrice?: boolean;
+      minPrice?: string;
+      maxPrice?: string;
+      date?: string;
       departureCity?: string;
       destinationCity?: string;
     };
   }) => {
-    const { airlineName, minPrice, maxPrice, departureCity, destinationCity } =
-      query;
+    const {
+      airlineName,
+      minPrice,
+      maxPrice,
+      departureCity,
+      date,
+      destinationCity,
+    } = query;
+
     return flightServices.filterasiFlight(
       airlineName || "",
       minPrice,
       maxPrice,
+      date,
       departureCity,
       destinationCity
     );

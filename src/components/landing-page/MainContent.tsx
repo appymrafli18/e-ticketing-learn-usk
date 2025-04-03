@@ -23,13 +23,28 @@ const Header = () => (
 const SearchFlight = () => {
   const router = useRouter();
 
-  const handleExploreMore = () => {
-    router.push("/search-flights");
+  const handleSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const from = formData.get("from") as string;
+    const to = formData.get("to") as string;
+    const tanggal = formData.get("tanggal") as string;
+
+    const params = new URLSearchParams();
+    if (from) params.append("from", from);
+    if (to) params.append("to", to);
+    if (tanggal) params.append("tanggal", tanggal);
+
+    router.push(`/search-flights?${params.toString()}`);
   };
   return (
     <div className="w-full max-w-4xl text-left bg-white rounded-lg shadow-lg p-6 text-gray-800 absolute -bottom-24">
       <div className="bg-white p-6 shadow-lg rounded-xl">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form
+          action="POST"
+          onSubmit={handleSubmitForm}
+          className="grid grid-cols-1 md:grid-cols-4 gap-4"
+        >
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">From</label>
             <div className="relative">
@@ -50,6 +65,7 @@ const SearchFlight = () => {
               <input
                 type="text"
                 placeholder="City or Airport"
+                name="from"
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -75,6 +91,7 @@ const SearchFlight = () => {
               <input
                 type="text"
                 placeholder="City or Airport"
+                name="to"
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -99,6 +116,7 @@ const SearchFlight = () => {
               </svg>
               <input
                 type="date"
+                name="tanggal"
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -106,13 +124,13 @@ const SearchFlight = () => {
 
           <div className="flex items-end">
             <button
-              onClick={handleExploreMore}
+              type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-200 font-medium"
             >
               Explore More
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

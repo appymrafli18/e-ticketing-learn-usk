@@ -45,8 +45,9 @@ const flightServices = {
 
   filterasiFlight: async (
     airlinesName: string,
-    minPrice?: boolean,
-    maxPrice?: boolean,
+    minPrice?: string,
+    maxPrice?: string,
+    date?: string,
     departureCity?: string,
     destinationCity?: string
   ) => {
@@ -65,6 +66,11 @@ const flightServices = {
               mode: "insensitive",
             },
           }),
+          ...(date && {
+            waktu_keberangkatan: {
+              gte: new Date(date),
+            },
+          }),
           ...(destinationCity && {
             kota_tujuan: {
               contains: destinationCity,
@@ -73,10 +79,10 @@ const flightServices = {
           }),
         },
         orderBy: {
-          ...(minPrice && {
+          ...(minPrice && minPrice === "asc" && {
             harga: "asc",
           }),
-          ...(maxPrice && {
+          ...(maxPrice && maxPrice === "desc" && {
             harga: "desc",
           }),
           ...(!minPrice &&
@@ -101,7 +107,7 @@ const flightServices = {
         return {
           statusCode: 404,
           message: "Success",
-          data: "Flight Not Found",
+          error: "Flight Not Found",
         };
       }
 
