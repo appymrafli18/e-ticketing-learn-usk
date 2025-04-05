@@ -7,8 +7,10 @@ import axios from "axios";
 import { IAirlines } from "@/types/airlines";
 import { FLIGHT } from "@/types/payment";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ErrorAxios } from "@/lib/axios-error";
+import useFlightStore from "@/store/booking";
+import timeArrival from "@/lib/timeArrival";
 
 interface ISorting {
   sortPrice?: string;
@@ -20,6 +22,8 @@ interface ISorting {
 
 const LandingFlights = () => {
   const { user, setUser } = useMe();
+  const router = useRouter();
+  const { setSelectedFlight } = useFlightStore();
   const [airlines, setAirlines] = useState<IAirlines[]>([]);
   const [flights, setFlights] = useState<FLIGHT[]>([]);
   const [errorMessage, setErrorMessage] = useState<Record<string, string>>();
@@ -56,8 +60,10 @@ const LandingFlights = () => {
       if (tanggal) params.append("date", tanggal);
       if (sorting && sorting.sortAirlines)
         params.append("airlineName", sorting.sortAirlines.name);
-      if (sorting && sorting.sortPrice === "asc") params.append("minPrice", sorting.sortPrice);
-      if (sorting && sorting.sortPrice === "desc") params.append("maxPrice", sorting.sortPrice);
+      if (sorting && sorting.sortPrice === "asc")
+        params.append("minPrice", sorting.sortPrice);
+      if (sorting && sorting.sortPrice === "desc")
+        params.append("maxPrice", sorting.sortPrice);
 
       const resFlight = await axios.get(
         `/api/flights/filter?${params.toString()}`
@@ -96,6 +102,11 @@ const LandingFlights = () => {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(price);
+  };
+
+  const handleBookingFLight = (flights: FLIGHT) => {
+    setSelectedFlight(flights);
+    router.push(`/checkout/${flights.uuid}`);
   };
 
   useEffect(() => {
@@ -300,8 +311,14 @@ const LandingFlights = () => {
                 <span className="text-sm text-gray-500">Sort by:</span>
                 <select
                   value={sorting?.sortPrice}
-                  onChange={(e) => setSorting((prev) => ({...prev, sortPrice: e.target.value}))}
-                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  onChange={(e) =>
+                    setSorting((prev) => ({
+                      ...prev,
+                      sortPrice: e.target.value,
+                    }))
+                  }
+                  className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
                   <option aria-disabled>Not Sorting</option>
                   <option value="asc">Price: Low to High</option>
                   <option value="desc">Price: High to Low</option>
@@ -358,19 +375,10 @@ const LandingFlights = () => {
 
                       <div className="flex-1 flex flex-col items-center">
                         <div className="text-xs text-gray-500 mb-1">
-                          {(() => {
-                            const departure = new Date(
-                              flight.waktu_keberangkatan
-                            );
-                            const arrival = new Date(flight.waktu_kedatangan);
-                            const diff =
-                              arrival.getTime() - departure.getTime();
-                            const hours = Math.floor(diff / (1000 * 60 * 60));
-                            const minutes = Math.floor(
-                              (diff % (1000 * 60 * 60)) / (1000 * 60)
-                            );
-                            return `${hours}j ${minutes}m`;
-                          })()}
+                          {timeArrival(
+                            flight.waktu_keberangkatan,
+                            flight.waktu_kedatangan
+                          )}
                         </div>
                         <div className="w-full flex items-center">
                           <div className="h-[2px] flex-1 bg-gray-300"></div>
@@ -417,7 +425,10 @@ const LandingFlights = () => {
                     <p className="text-2xl font-bold text-blue-600 mb-2">
                       {formatPrice(Number(flight.harga))}
                     </p>
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200 font-medium">
+                    <button
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200 font-medium"
+                      onClick={() => handleBookingFLight(flight)}
+                    >
                       Book Flight
                     </button>
                   </div>

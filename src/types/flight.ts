@@ -28,7 +28,7 @@ export interface SelectFlight {
     createdAt: string;
     updatedAt: string;
   };
-  bookings: {
+  bookings?: {
     id: number;
     uuid: string;
     jumlah_kursi: number;

@@ -60,6 +60,9 @@ const flightServices = {
               mode: "insensitive",
             },
           },
+          kursi_tersedia: {
+            gt: 0,
+          },
           ...(departureCity && {
             kota_keberangkatan: {
               contains: departureCity,
@@ -79,12 +82,14 @@ const flightServices = {
           }),
         },
         orderBy: {
-          ...(minPrice && minPrice === "asc" && {
-            harga: "asc",
-          }),
-          ...(maxPrice && maxPrice === "desc" && {
-            harga: "desc",
-          }),
+          ...(minPrice &&
+            minPrice === "asc" && {
+              harga: "asc",
+            }),
+          ...(maxPrice &&
+            maxPrice === "desc" && {
+              harga: "desc",
+            }),
           ...(!minPrice &&
             !maxPrice && {
               id: "asc",

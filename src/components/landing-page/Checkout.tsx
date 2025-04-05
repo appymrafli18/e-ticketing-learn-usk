@@ -3,27 +3,17 @@ import { useEffect, useState } from "react";
 import NavbarWithoutLogin from "./NavbarList/NavbarWithoutLogin";
 import NavbarWithLogin from "./NavbarList/NavbarWithLogin";
 import useMe from "@/store/me";
+import axios from "axios";
+import { SelectFlight } from "@/types/flight";
+import timeArrival from "@/lib/timeArrival";
+import toast, { Toaster } from "react-hot-toast";
 
-const Checkout = () => {
+const Checkout = ({ paramsUUID }: { paramsUUID: string }) => {
   const { user, setUser } = useMe();
+  const [flight, setFlight] = useState<SelectFlight>();
   const [activeStep, setActiveStep] = useState(1);
+  const [totalOrang, setTotalOrang] = useState<number>(1);
   const [paymentMethod, setPaymentMethod] = useState("credit-card");
-
-  // Sample flight data (in a real app, this would come from state/props)
-  const flight = {
-    id: 1,
-    airline: "Garuda Indonesia",
-    flightNumber: "GA-421",
-    departure: "Jakarta (CGK)",
-    arrival: "Bali (DPS)",
-    departureTime: "07:30",
-    departureDate: "Monday, 15 July 2024",
-    arrivalTime: "10:15",
-    arrivalDate: "Monday, 15 July 2024",
-    duration: "2h 45m",
-    price: 1250000,
-    logo: "/placeholder.svg?height=50&width=50",
-  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -34,7 +24,7 @@ const Checkout = () => {
   };
 
   const calculateTotal = () => {
-    const total = flight.price;
+    const total = Number(flight?.harga);
     return total;
   };
 
@@ -52,13 +42,47 @@ const Checkout = () => {
     }
   };
 
+  const handleCompleteBooking = async () => {
+    try {
+      const createBooking = await axios.post("/api/bookings/create", {
+        flightId: flight?.uuid,
+        jumlah_kursi: totalOrang,
+      });
+
+      const bookingData = createBooking.data;
+
+      const hitApiCreatePayment = await axios.post("/api/payments/create", {
+        payment_method: paymentMethod,
+        bookingId: bookingData.data.booking_uuid,
+      });
+
+      if (hitApiCreatePayment.status === 201) {
+        toast.success("Pembelian Ticket Pesawat telah berhasil.");
+
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1500);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     setUser();
   }, [setUser]);
 
+  useEffect(() => {
+    axios
+      .get(`/api/flights/select/${paramsUUID}`)
+      .then((res) => setFlight(res.data.data))
+      .catch(() => (window.location.href = "/"));
+  }, [paramsUUID]);
+
   return (
     <div className="bg-gray-50 min-h-screen">
       {user ? <NavbarWithLogin /> : <NavbarWithoutLogin />}
+      <Toaster position="top-right" reverseOrder={false} />
 
       <main className="pt-[4.5rem]">
         {/* Checkout Header */}
@@ -69,7 +93,7 @@ const Checkout = () => {
             </h1>
             <p className="text-blue-100 mt-2">
               Youre just a few steps away from your trip to{" "}
-              {flight.arrival.split("(")[0]}
+              {flight?.kota_tujuan.split("(")[0]}
             </p>
           </div>
         </div>
@@ -151,27 +175,44 @@ const Checkout = () => {
                     <div>
                       <div className="flex items-center mb-1">
                         <span className="px-2 py-1 text-xs font-normal bg-blue-50 text-blue-700 border border-blue-200 rounded-full mr-2">
-                          {flight.flightNumber}
+                          {flight?.no_penerbangan}
                         </span>
                         <span className="text-sm text-gray-500">
-                          {flight.airline}
+                          {flight?.airlines.name}
                         </span>
                       </div>
                       <div className="flex items-center mt-2">
                         <div className="mr-4">
                           <p className="text-lg font-bold">
-                            {flight.departureTime}
+                            {flight &&
+                              `${new Date(
+                                flight?.waktu_keberangkatan
+                              ).getHours()}:${new Date(
+                                flight?.waktu_keberangkatan
+                              ).getMinutes()}`}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {flight.departure}
+                            {flight?.kota_keberangkatan}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {flight.departureDate}
+                            {flight &&
+                              new Date(
+                                flight.waktu_keberangkatan
+                              ).toLocaleDateString("id-ID", {
+                                weekday: "long",
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              })}
                           </p>
                         </div>
                         <div className="flex flex-col items-center mx-2">
                           <div className="text-xs text-gray-500 mb-1">
-                            {flight.duration}
+                            {flight &&
+                              timeArrival(
+                                flight.waktu_keberangkatan,
+                                flight.waktu_kedatangan
+                              )}
                           </div>
                           <div className="w-20 flex items-center">
                             <div className="h-[2px] flex-1 bg-gray-300"></div>
@@ -194,19 +235,55 @@ const Checkout = () => {
                         </div>
                         <div className="ml-4">
                           <p className="text-lg font-bold">
-                            {flight.arrivalTime}
+                            {flight &&
+                              `${new Date(
+                                flight.waktu_kedatangan
+                              ).getHours()}:${new Date(
+                                flight.waktu_kedatangan
+                              ).getMinutes()}`}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {flight.arrival}
+                            {flight?.kota_tujuan}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {flight.arrivalDate}
+                            {flight &&
+                              new Date(
+                                flight.waktu_kedatangan
+                              ).toLocaleDateString("id-ID", {
+                                weekday: "long",
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              })}
                           </p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                {activeStep === 1 && (
+                  <div className="mb-6">
+                    <label
+                      htmlFor="totalOrang"
+                      className="block text-lg font-medium text-gray-700 mb-2"
+                    >
+                      Total Orang
+                    </label>
+                    <input
+                      id="totalOrang"
+                      type="number"
+                      placeholder="Total Orang"
+                      value={totalOrang}
+                      onChange={(e) => {
+                        if (Number(e.target.value) > 0) {
+                          setTotalOrang(Number(e.target.value));
+                        }
+                      }}
+                      className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                )}
 
                 {/* Step 3: Payment */}
                 {activeStep === 3 && (
@@ -567,7 +644,10 @@ const Checkout = () => {
                       Continue
                     </button>
                   ) : (
-                    <button className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    <button
+                      onClick={handleCompleteBooking}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
                       Complete Booking
                     </button>
                   )}
@@ -586,10 +666,14 @@ const Checkout = () => {
                   <div className="flex justify-between pb-4 border-b">
                     <span className="text-gray-600">Base Fare</span>
                     <span className="font-medium">
-                      {formatPrice(flight.price)}
+                      {flight && formatPrice(Number(flight.harga))}
                     </span>
                   </div>
 
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Tickets</span>
+                    <span className="font-medium">{totalOrang}</span>
+                  </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Taxes & Fees</span>
                     <span className="font-medium">{formatPrice(0)}</span>
@@ -598,7 +682,7 @@ const Checkout = () => {
                   <div className="flex justify-between pt-4 border-t">
                     <span className="text-lg font-bold">Total</span>
                     <span className="text-lg font-bold text-blue-600">
-                      {formatPrice(calculateTotal())}
+                      {flight && formatPrice(calculateTotal() * totalOrang)}
                     </span>
                   </div>
                 </div>
@@ -610,17 +694,27 @@ const Checkout = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Flight</span>
-                      <span className="font-medium">{flight.flightNumber}</span>
+                      <span className="font-medium">
+                        {flight?.no_penerbangan}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Date</span>
                       <span className="font-medium">
-                        {flight.departureDate}
+                        {flight &&
+                          new Date(
+                            flight.waktu_keberangkatan
+                          ).toLocaleDateString("id-ID", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Passengers</span>
-                      <span className="font-medium">1 Adult</span>
+                      <span className="font-medium">{totalOrang} Adult</span>
                     </div>
                   </div>
                 </div>

@@ -120,6 +120,9 @@ const bookingServices = {
         userId: user.role === "Admin" ? (body.userId as number) : user.id,
       };
 
+      if (searchFlights.kursi_tersedia < data.jumlah_kursi)
+        return { statusCode: 400, message: "Kursi Tersedia Kurang" };
+
       await prisma_connection.flights.update({
         where: {
           id: searchFlights.id,
@@ -129,7 +132,7 @@ const bookingServices = {
         },
       });
 
-      await prisma_connection.booking.create({
+      const createBook = await prisma_connection.booking.create({
         data: {
           userId: data.userId,
           jumlah_kursi: data.jumlah_kursi,
@@ -138,7 +141,13 @@ const bookingServices = {
         },
       });
 
-      return { statusCode: 200, message: "Success", data };
+      return {
+        statusCode: 201,
+        message: "Success",
+        data: {
+          booking_uuid: createBook.uuid,
+        },
+      };
     } catch (error) {
       return {
         statusCode: 400,

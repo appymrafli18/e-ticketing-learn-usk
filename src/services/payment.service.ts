@@ -138,7 +138,7 @@ const paymentServices = {
         data,
       });
 
-      return { statusCode: 200, message: "Success", data: response };
+      return { statusCode: 201, message: "Success", data: response };
     } catch (error) {
       return {
         statusCode: 400,
@@ -174,33 +174,18 @@ const paymentServices = {
       if (body?.status && !(body.status in Status))
         return { statusCode: 400, message: "Status not found" };
 
+      const flightId = searchPayment.booking.flightId;
+      const countKursi = searchPayment.booking.jumlah_kursi;
+
+      const flight = await prisma_connection.flights.findUnique({
+        where: {
+          id: flightId,
+        },
+      });
+
+      if (!flight) return { statusCode: 404, message: "Flight not found" };
+
       if (body.status === "Confirmed") {
-        const flightId = searchPayment.booking.flightId;
-        const countKursi = searchPayment.booking.jumlah_kursi;
-
-        const flight = await prisma_connection.flights.findUnique({
-          where: {
-            id: flightId,
-          },
-        });
-
-        if (!flight) return { statusCode: 404, message: "Flight not found" };
-
-        if (flight.kursi_tersedia < countKursi)
-          return {
-            statusCode: 400,
-            message: "Kursi not enough",
-          };
-
-        await prisma_connection.flights.update({
-          where: {
-            id: flight.id,
-          },
-          data: {
-            kursi_tersedia: flight.kursi_tersedia - countKursi,
-          },
-        });
-
         await prisma_connection.booking.update({
           where: {
             id: searchPayment.bookingId,
@@ -216,6 +201,15 @@ const paymentServices = {
           },
           data: {
             status: data.status,
+          },
+        });
+
+        await prisma_connection.flights.update({
+          where: {
+            id: flight.id,
+          },
+          data: {
+            kursi_tersedia: flight.kursi_tersedia + countKursi,
           },
         });
       }
