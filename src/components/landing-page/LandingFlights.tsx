@@ -93,7 +93,7 @@ const LandingFlights = () => {
     if (to) params.append("to", to);
     if (tanggal) params.append("tanggal", tanggal);
 
-    window.location.href = `/search-flights?${params}`;
+    window.location.href = `/suclog/search-flights?${params}`;
   };
 
   const formatPrice = (price: number) => {
@@ -106,7 +106,7 @@ const LandingFlights = () => {
 
   const handleBookingFLight = (flights: FLIGHT) => {
     setSelectedFlight(flights);
-    router.push(`/checkout/${flights.uuid}`);
+    router.push(`/suclog/checkout/${flights.uuid}`);
   };
 
   useEffect(() => {

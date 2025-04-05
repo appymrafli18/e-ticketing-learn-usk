@@ -13,13 +13,7 @@ export async function middleware(req: NextRequest) {
     return null;
   }
 
-  if (req.nextUrl.pathname.startsWith("/checkout")) {
-    const getToken = req.cookies.get("token")?.value;
-    if (!getToken) return NextResponse.redirect(new URL("/", req.url));
-    return null;
-  }
-
-  if (req.nextUrl.pathname.startsWith("/search-flights")) {
+  if (req.nextUrl.pathname.startsWith("/suclog")) {
     const getToken = req.cookies.get("token")?.value;
     if (!getToken) return NextResponse.redirect(new URL("/login", req.url));
     return null;
@@ -35,5 +29,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/checkout", "/search-flights", "/login"],
+  matcher: ["/dashboard/:path*", "/suclog/:path*", "/login"],
 };

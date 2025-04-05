@@ -35,7 +35,7 @@ const SearchFlight = () => {
     if (to) params.append("to", to);
     if (tanggal) params.append("tanggal", tanggal);
 
-    router.push(`/search-flights?${params.toString()}`);
+    router.push(`/suclog/search-flights?${params.toString()}`);
   };
   return (
     <div className="w-full max-w-4xl text-left bg-white rounded-lg shadow-lg p-6 text-gray-800 absolute -bottom-24">

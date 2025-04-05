@@ -47,6 +47,9 @@ const flightController = {
     );
   },
 
+  getTotalFLight: ({ store }: { store: { user: IPayload } }) =>
+    flightServices.getTotalFLight(store.user),
+
   createFlight: async ({
     body,
     store,

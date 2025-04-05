@@ -24,6 +24,9 @@ const bookingServices = {
           flight: {
             airlinesId: airlinesId,
           },
+          ...(user.role === "Maskapai" && {
+            status: "Confirmed",
+          }),
         },
         omit: {
           userId: true,
@@ -35,12 +38,56 @@ const bookingServices = {
               name: true,
             },
           },
+          flight: {
+            select: {
+              no_penerbangan: true,
+            },
+          },
         },
       });
 
       if (!response) return { statusCode: 404, message: "Bookings not found" };
 
       return { statusCode: 200, message: "Success", data: response };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
+  getTotalBooking: async (user: IPayload) => {
+    if (user.role === "User")
+      return { statusCode: 401, message: "Unauthorized" };
+
+    try {
+      const totalBooking = await prisma_connection.booking.count({
+        where: {
+          ...(user.role === "Maskapai" && {
+            flight: {
+              airlines: {
+                userId: user.id,
+              },
+            },
+            status: "Confirmed",
+          }),
+        },
+      });
+
+      if (!totalBooking)
+        return {
+          statusCode: 404,
+          message: "Total Booking Not Found",
+          data: 0,
+        };
+
+      return {
+        statusCode: 200,
+        message: "Success",
+        data: totalBooking,
+      };
     } catch (error) {
       return {
         statusCode: 400,
@@ -72,6 +119,9 @@ const bookingServices = {
           flight: {
             airlinesId: airlinesId,
           },
+          ...(user.role === "Maskapai" && {
+            status: "Confirmed",
+          }),
         },
         omit: {
           flightId: true,

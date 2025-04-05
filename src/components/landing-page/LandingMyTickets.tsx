@@ -1,15 +1,11 @@
 "use client";
 import { useCallback, useEffect } from "react";
-import Footer from "./Footer";
-import MainContent from "./MainContent";
 import NavbarWithoutLogin from "./NavbarList/NavbarWithoutLogin";
 import useMe from "@/store/me";
 import NavbarWithLogin from "./NavbarList/NavbarWithLogin";
-import ContactUs from "./ContactUs";
-import AboutUs from "./AboutUs";
-import ServicesUs from "./ServicesUs";
+import MyTickets from "./my-tickets/MyTickets";
 
-const Landing = () => {
+const LandingMyTickets = () => {
   const { user, setUser } = useMe();
 
   const checkLogin = useCallback(() => {
@@ -26,14 +22,10 @@ const Landing = () => {
     <div>
       {user ? <NavbarWithLogin /> : <NavbarWithoutLogin />}
       <main className="min-h-screen">
-        <MainContent />
-        <AboutUs />
-        <ServicesUs />
-        <ContactUs />
+        <MyTickets />
       </main>
-      <Footer />
     </div>
   );
 };
 
-export default Landing;
+export default LandingMyTickets;

@@ -13,4 +13,7 @@ export interface BOOKING {
   user: {
     name: string;
   };
+  flight: {
+    no_penerbangan: string;
+  };
 }

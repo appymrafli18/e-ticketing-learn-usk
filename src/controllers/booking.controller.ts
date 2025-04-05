@@ -15,6 +15,9 @@ const bookingController = {
     store: { user: IPayload };
   }) => bookingServices.getOneBooking(params.uuid, store.user),
 
+  getTotalBooking: ({ store }: { store: { user: IPayload } }) =>
+    bookingServices.getTotalBooking(store.user),
+
   createBookings: async ({
     body,
     store,

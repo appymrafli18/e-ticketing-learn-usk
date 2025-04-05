@@ -126,6 +126,38 @@ const flightServices = {
     }
   },
 
+  getTotalFLight: async (user: IPayload) => {
+    if (user.role === "User")
+      return { statusCode: 401, message: "Unauthorized" };
+
+    try {
+      const totalFlight = await prisma_connection.flights.count({
+        where: {
+          ...(user.role === "Maskapai" && {
+            airlines: {
+              userId: user.id,
+            },
+          }),
+        },
+      });
+
+      if (!totalFlight)
+        return {
+          statusCode: 404,
+          message: "Total Flight Not Found",
+          data: 0,
+        };
+
+      return { statusCode: 200, message: "Success", data: totalFlight };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
   getFlightById: async (uuid: string, user: IPayload) => {
     try {
       const searchAirlines = await prisma_connection.airlines.findUnique({

@@ -15,13 +15,13 @@ const NavbarWithoutLogin = () => {
           <Link href="/" className="text-white hover:text-gray-200">
             Home
           </Link>
-          <a href="#" className="text-white hover:text-gray-200">
+          <a href="#about-us" className="text-white hover:text-gray-200">
             About
           </a>
-          <a href="#" className="text-white hover:text-gray-200">
+          <a href="#services" className="text-white hover:text-gray-200">
             Services
           </a>
-          <a href="#" className="text-white hover:text-gray-200">
+          <a href="#contact-us" className="text-white hover:text-gray-200">
             Contact
           </a>
         </div>

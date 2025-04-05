@@ -115,6 +115,50 @@ const paymentServices = {
     }
   },
 
+  getTotalRevenuePayment: async (user: IPayload) => {
+    if (user.role === "User")
+      return { statusCode: 401, message: "Unauthorized" };
+    try {
+      const totalRevenue = await prisma_connection.payment.aggregate({
+        _sum: {
+          jumlah_pembayaran: true,
+        },
+        where: {
+          status: "Confirmed",
+          ...(user.role === "Maskapai" && {
+            booking: {
+              flight: {
+                airlines: {
+                  userId: user.id,
+                },
+              },
+            },
+          }),
+        },
+      });
+
+      if (!totalRevenue)
+        return {
+          statusCode: 404,
+          message: "Revenue not found",
+          data: 0,
+          error: "Tidak memiliki data revenue",
+        };
+
+      return {
+        statusCode: 200,
+        message: "Success",
+        data: totalRevenue._sum.jumlah_pembayaran,
+      };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
   createPayment: async (body: IPayment, user: IPayload) => {
     if (user.role !== "User")
       return { statusCode: 401, message: "Unauthorized" };

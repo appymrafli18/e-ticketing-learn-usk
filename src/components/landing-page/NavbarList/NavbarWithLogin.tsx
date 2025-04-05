@@ -53,7 +53,7 @@ const NavbarWithLogin = () => {
 
         <div className="hidden md:flex space-x-4">
           <Link
-            href=""
+            href="/suclog/my-tickets"
             className="text-white border border-white px-2 py-1 hover:bg-white hover:text-black rounded border-transparent transition-all duration-300 flex items-center justify-center"
           >
             My Tickets
