@@ -24,6 +24,9 @@ const bookingServices = {
           flight: {
             airlinesId: airlinesId,
           },
+          ...(user.role === "Maskapai" && {
+            status: "Confirmed",
+          }),
         },
         omit: {
           userId: true,
@@ -35,12 +38,49 @@ const bookingServices = {
               name: true,
             },
           },
+          flight: {
+            select: {
+              no_penerbangan: true,
+            },
+          },
         },
       });
 
       if (!response) return { statusCode: 404, message: "Bookings not found" };
 
       return { statusCode: 200, message: "Success", data: response };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
+  getTotalBooking: async (user: IPayload) => {
+    if (user.role === "User")
+      return { statusCode: 401, message: "Unauthorized" };
+
+    try {
+      const totalBooking = await prisma_connection.booking.count({
+        where: {
+          ...(user.role === "Maskapai" && {
+            flight: {
+              airlines: {
+                userId: user.id,
+              },
+            },
+            status: "Confirmed",
+          }),
+        },
+      });
+
+      return {
+        statusCode: 200,
+        message: "Success",
+        data: totalBooking,
+      };
     } catch (error) {
       return {
         statusCode: 400,
@@ -72,6 +112,9 @@ const bookingServices = {
           flight: {
             airlinesId: airlinesId,
           },
+          ...(user.role === "Maskapai" && {
+            status: "Confirmed",
+          }),
         },
         omit: {
           flightId: true,
@@ -120,32 +163,34 @@ const bookingServices = {
         userId: user.role === "Admin" ? (body.userId as number) : user.id,
       };
 
-      const searchBookings = await prisma_connection.booking.findFirst({
+      if (searchFlights.kursi_tersedia < data.jumlah_kursi)
+        return { statusCode: 400, message: "Kursi Tersedia Kurang" };
+
+      await prisma_connection.flights.update({
         where: {
-          flightId: data.flightId,
-          userId: data.userId,
+          id: searchFlights.id,
+        },
+        data: {
+          kursi_tersedia: searchFlights.kursi_tersedia - data.jumlah_kursi,
         },
       });
 
-      if (searchBookings) {
-        await prisma_connection.booking.update({
-          data,
-          where: {
-            id: searchBookings.id,
-          },
-        });
-      } else {
-        await prisma_connection.booking.create({
-          data: {
-            userId: data.userId,
-            jumlah_kursi: data.jumlah_kursi,
-            flightId: data.flightId,
-            total_harga: data.total_harga,
-          },
-        });
-      }
+      const createBook = await prisma_connection.booking.create({
+        data: {
+          userId: data.userId,
+          jumlah_kursi: data.jumlah_kursi,
+          flightId: data.flightId,
+          total_harga: data.total_harga,
+        },
+      });
 
-      return { statusCode: 200, message: "Success", data };
+      return {
+        statusCode: 201,
+        message: "Success",
+        data: {
+          booking_uuid: createBook.uuid,
+        },
+      };
     } catch (error) {
       return {
         statusCode: 400,

@@ -1,6 +1,7 @@
 import React from "react";
 import TempLoader from "../TempLoader";
 import { PAYMENT } from "@/types/payment";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface PaymentsTableProps {
   initialValues: PAYMENT[];
@@ -36,7 +37,6 @@ const PaymentsTable = ({
         </thead>
         <tbody className="text-sm font-light text-gray-600">
           {initialValues.map((item, index) => {
-            // if (item.status === "Confirmed") return null;
             return (
               <tr
                 className="border-b border-gray-200 hover:bg-gray-100"
@@ -50,7 +50,9 @@ const PaymentsTable = ({
                 </td>
                 <td className="px-6 py-3 text-left">{item.payment_method}</td>
                 <td className="px-6 py-3 text-left">
-                  {item.jumlah_pembayaran}
+                  {new Intl.NumberFormat("id-ID").format(
+                    Number(item.jumlah_pembayaran)
+                  )}
                 </td>
                 <td className="px-6 py-3 text-center">
                   <p className={`status status-${item.status.toLowerCase()}`}>
@@ -58,19 +60,17 @@ const PaymentsTable = ({
                   </p>
                 </td>
                 {selectStatus === "Pending" && (
-                  <td className="px-6 py-3 text-center">
-                    <button
-                      className="rounded bg-green-500 px-4 mx-1 py-1 text-white"
+                  <td className="px-6 py-3 text-center flex gap-x-4">
+                    <CheckCircle
+                      width={20}
+                      className="text-green-500 hover:cursor-pointer"
                       onClick={() => onConfirm(item.uuid)}
-                    >
-                      Confirm
-                    </button>
-                    <button
-                      className="rounded bg-red-500 px-4 mx-1 py-1 text-white"
+                    />
+                    <XCircle
+                      width={20}
+                      className="text-red-500 hover:cursor-pointer"
                       onClick={() => onCancel(item.uuid)}
-                    >
-                      Reject
-                    </button>
+                    />
                   </td>
                 )}
               </tr>

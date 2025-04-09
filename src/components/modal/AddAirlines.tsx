@@ -7,6 +7,7 @@ import axios from "axios";
 import { SelectField } from "../input/SelectField";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useMe from "@/store/me";
 
 interface IDataAirlines {
   name: string;
@@ -17,7 +18,6 @@ interface IDataAirlines {
 interface IAddAirlinesProps {
   isOpen: boolean;
   loading: boolean;
-  role: string;
   onClose: () => void;
 }
 
@@ -30,9 +30,9 @@ export default function AddAirlines({
   isOpen,
   loading,
   onClose,
-  role,
 }: IAddAirlinesProps) {
   const [option, setOption] = useState<IOption[]>([]);
+  const { user } = useMe();
   const [error, setError] = useState<Record<string, string>>({});
 
   const initialValues: IDataAirlines = {
@@ -42,7 +42,7 @@ export default function AddAirlines({
   };
 
   const handleSubmit = async (data: IDataAirlines) => {
-    console.log("submitted:", data);
+    // console.log("submitted:", data);
 
     try {
       const response = await axios.post("/api/airlines/create", data, {
@@ -71,22 +71,24 @@ export default function AddAirlines({
   };
 
   useEffect(() => {
-    axios
-      .get("/api/user/all/Maskapai")
-      .then((res) => {
-        const mappedData = res.data.data.map(
-          (item: { id: number; name: string }) => ({
-            value: item.id.toString(),
-            label: item.name,
-          })
-        );
-        setOption(mappedData);
-        if (option.length === 0) return null;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [option.length]);
+    if (user && user.role === "Admin") {
+      axios
+        .get("/api/user/all/Maskapai")
+        .then((res) => {
+          const mappedData = res.data.data.map(
+            (item: { id: number; name: string }) => ({
+              value: item.id.toString(),
+              label: item.name,
+            })
+          );
+          setOption(mappedData);
+          if (option.length === 0) return null;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [option.length, user]);
 
   if (!isOpen) return null;
 
@@ -108,7 +110,8 @@ export default function AddAirlines({
                 label="Name"
                 name="name"
                 onChange={handleChange}
-                value={formData?.name}
+                value={user?.name}
+                disable={true}
                 inputStyle="w-full"
                 placeholder="Masukkan Nama Airlines"
                 required
@@ -122,7 +125,7 @@ export default function AddAirlines({
                 required
                 type="file"
               />
-              {role === "Admin" && (
+              {user && user.role === "Admin" && (
                 <SelectField
                   label="Maskapai"
                   name="userId"

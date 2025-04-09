@@ -22,7 +22,7 @@ enum Role {
 enum Status {
   Pending
   Confirmed
-  Canceled
+  Cancelled
 }
 
 enum TypeReport {
@@ -70,7 +70,8 @@ model Airlines {
 model Flights {
   id                  Int      @id @default(autoincrement())
   uuid                String   @unique @default(uuid())
-  no_penerbangan      String
+  no_penerbangan      String   @unique
+  isDeleted           Boolean  @default(false)
   kota_keberangkatan  String
   kota_tujuan         String
   waktu_keberangkatan DateTime
@@ -121,7 +122,7 @@ model Payment {
   updatedAt         DateTime @updatedAt
 
   // relasi one-to-one dengan tbl_bookings
-  bookingId Int          @unique
+  bookingId Int     @unique
   booking   Booking @relation(fields: [bookingId], references: [id])
 
   // Relasi one-to-many dengan tbl_reports (satu pembayaran bisa memiliki banyak laporan)

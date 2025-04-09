@@ -4,14 +4,24 @@ import { create } from "zustand";
 
 interface IUserState {
   user: USER | null;
+  loading: boolean;
   setUser: () => void;
 }
 
 const useMe = create<IUserState>((set) => ({
   user: null,
+  loading: false,
   setUser: async () => {
-    const response = await axios.get("/api/user/me");
-    if (response.status === 200) set({ user: response.data.data });
+    set({ loading: true });
+    await axios
+      .get("/api/user/me")
+      .then((res) => {
+        set({ user: res.data.data });
+      })
+      .catch(() => {
+        set({ user: null });
+      })
+      .finally(() => set({ loading: false }));
   },
 }));
 

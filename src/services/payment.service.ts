@@ -4,7 +4,7 @@ import { IPayment } from "@/types/payment";
 import { Status } from "@prisma/client";
 
 const paymentServices = {
-  getAllPayments: async (type: string, user: IPayload) => {
+  getAllPayments: async (status: string, user: IPayload) => {
     if (user.role === "Maskapai")
       return { statusCode: 401, message: "Unauthorized" };
     try {
@@ -23,7 +23,8 @@ const paymentServices = {
       const airlinesId = searchAirlines?.id;
       const response = await prisma_connection.payment.findMany({
         where: {
-          status: type as Status,
+          // ...(status && status in Status && { status: status as Status }),
+          ...(status && { status: status as Status }),
           booking: {
             ...(user.role === "User" && { userId: user.id }),
             flight: {
@@ -114,6 +115,42 @@ const paymentServices = {
     }
   },
 
+  getTotalRevenuePayment: async (user: IPayload) => {
+    if (user.role === "User")
+      return { statusCode: 401, message: "Unauthorized" };
+    try {
+      const totalRevenue = await prisma_connection.payment.aggregate({
+        _sum: {
+          jumlah_pembayaran: true,
+        },
+        where: {
+          status: "Confirmed",
+          ...(user.role === "Maskapai" && {
+            booking: {
+              flight: {
+                airlines: {
+                  userId: user.id,
+                },
+              },
+            },
+          }),
+        },
+      });
+
+      return {
+        statusCode: 200,
+        message: "Success",
+        data: totalRevenue._sum.jumlah_pembayaran || 0,
+      };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
+
   createPayment: async (body: IPayment, user: IPayload) => {
     if (user.role !== "User")
       return { statusCode: 401, message: "Unauthorized" };
@@ -137,7 +174,7 @@ const paymentServices = {
         data,
       });
 
-      return { statusCode: 200, message: "Success", data: response };
+      return { statusCode: 201, message: "Success", data: response };
     } catch (error) {
       return {
         statusCode: 400,
@@ -173,48 +210,42 @@ const paymentServices = {
       if (body?.status && !(body.status in Status))
         return { statusCode: 400, message: "Status not found" };
 
-      if (body.status === "Confirmed") {
-        const flightId = searchPayment.booking.flightId;
-        const countKursi = searchPayment.booking.jumlah_kursi;
+      const flightId = searchPayment.booking.flightId;
+      const countKursi = searchPayment.booking.jumlah_kursi;
 
-        const flight = await prisma_connection.flights.findUnique({
+      const flight = await prisma_connection.flights.findUnique({
+        where: {
+          id: flightId,
+        },
+      });
+
+      if (!flight) return { statusCode: 404, message: "Flight not found" };
+
+      if (body.status === "Confirmed") {
+        await prisma_connection.booking.update({
           where: {
-            id: flightId,
+            id: searchPayment.bookingId,
+          },
+          data: {
+            status: data.status,
           },
         });
-
-        if (!flight) return { statusCode: 404, message: "Flight not found" };
-
-        if (flight.kursi_tersedia < countKursi)
-          return {
-            statusCode: 400,
-            message: "Kursi not enough",
-          };
+      } else if (body.status === "Cancelled") {
+        await prisma_connection.booking.update({
+          where: {
+            id: searchPayment.bookingId,
+          },
+          data: {
+            status: data.status,
+          },
+        });
 
         await prisma_connection.flights.update({
           where: {
             id: flight.id,
           },
           data: {
-            kursi_tersedia: flight.kursi_tersedia - countKursi,
-          },
-        });
-
-        await prisma_connection.booking.update({
-          where: {
-            id: searchPayment.bookingId,
-          },
-          data: {
-            status: data.status,
-          },
-        });
-      } else if (body.status === "Canceled") {
-        await prisma_connection.booking.update({
-          where: {
-            id: searchPayment.bookingId,
-          },
-          data: {
-            status: data.status,
+            kursi_tersedia: flight.kursi_tersedia + countKursi,
           },
         });
       }

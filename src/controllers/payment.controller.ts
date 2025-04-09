@@ -8,9 +8,9 @@ const paymentController = {
     params,
     store,
   }: {
-    params: { status: string };
+    params: IParams;
     store: { user: IPayload };
-  }) => paymentServices.getAllPayments(params.status,store.user),
+  }) => paymentServices.getAllPayments(params.uuid, store.user),
   getOnePayment: async ({
     params,
     store,
@@ -18,6 +18,8 @@ const paymentController = {
     params: IParams;
     store: { user: IPayload };
   }) => paymentServices.getOnePayment(params.uuid, store.user),
+  getTotalRevenuePayment: ({ store }: { store: { user: IPayload } }) =>
+    paymentServices.getTotalRevenuePayment(store.user),
   createPayment: async ({
     body,
     store,

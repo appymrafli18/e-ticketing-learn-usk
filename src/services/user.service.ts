@@ -157,6 +157,45 @@ export const userServices = {
       };
     }
   },
+  updateMe: async (body: USER, user: IPayload) => {
+    try {
+      const search = await prisma_connection.user.findUnique({
+        where: {
+          id: user.id,
+        },
+      });
+
+      if (!search) return { statusCode: 404, message: "User not found" };
+
+      const updatedData = {
+        ...search,
+        ...Object.fromEntries(
+          Object.keys(body).map((key) => [
+            key,
+            body[key as keyof USER] || search[key as keyof USER],
+          ])
+        ),
+        password: body.password
+          ? await hashPassword(body.password)
+          : search.password,
+      };
+
+      await prisma_connection.user.update({
+        where: {
+          id: search.id,
+        },
+        data: updatedData,
+      });
+
+      return { statusCode: 200, message: "Success updated data user" };
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      };
+    }
+  },
 
   updateUser: async (uuid: string, body: USER, user: IPayload) => {
     if (user.role !== "Admin")

@@ -1,5 +1,5 @@
 "use client";
-import { FLIGHT } from "@/types/flight";
+import { FLIGHT, SelectFlight } from "@/types/flight";
 import FormComponent from "../form/FormComponent";
 import InputField from "../input/InputField";
 import getCurrentDateTime from "@/lib/nowDate";
@@ -12,7 +12,7 @@ interface IEditFlightProps {
   isOpen: boolean;
   onClose: () => void;
   loading: boolean;
-  initialValues: FLIGHT;
+  initialValues: SelectFlight;
 }
 
 export default function EditFlight({
@@ -23,18 +23,22 @@ export default function EditFlight({
 }: IEditFlightProps) {
   const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
 
-  const handleSubmit = async (data: FLIGHT) => {
-    console.log("submitted:", data);
+  const handleSubmit = async (data: SelectFlight) => {
 
-    delete data.id;
-
-    data.waktu_keberangkatan = getCurrentDateTime(data.waktu_keberangkatan);
-    data.waktu_kedatangan = getCurrentDateTime(data.waktu_kedatangan);
-
+    const updateData = {
+      no_penerbangan: data.no_penerbangan,
+      kota_keberangkatan: data.kota_keberangkatan,
+      kota_tujuan: data.kota_tujuan,
+      waktu_keberangkatan:getCurrentDateTime(data.waktu_keberangkatan), 
+      waktu_kedatangan: getCurrentDateTime(data.waktu_kedatangan),
+      harga: data.harga,
+      kapasitas_kursi: data.kapasitas_kursi,
+      kursi_tersedia: data.kursi_tersedia,
+    };
     try {
       const response = await axios.put(
         `/api/flights/update/${data.uuid}`,
-        data,
+        updateData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -67,7 +71,7 @@ export default function EditFlight({
       <div className="rounded-lg shadow-lg p-6 w-full max-w-md bg-white">
         <h2 className="text-lg font-semibold mb-4">Edit Flight</h2>
 
-        <FormComponent<FLIGHT>
+        <FormComponent<SelectFlight>
           initialValues={initialValues}
           buttonLoading={loading}
           onClose={onClose}

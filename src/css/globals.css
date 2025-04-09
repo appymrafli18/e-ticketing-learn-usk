@@ -18,6 +18,6 @@ html {
   @apply bg-yellow-500 text-white;
 }
 
-.status-canceled {
+.status-cancelled {
   @apply bg-red-500 text-white;
 }

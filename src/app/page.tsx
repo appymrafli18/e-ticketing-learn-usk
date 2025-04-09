@@ -1,4 +1,5 @@
-"use client";
+import Landing from "@/components/landing-page/Landing";
+
 export default function Home() {
-  return <div className="">Hello World!</div>;
+  return <Landing />;
 }

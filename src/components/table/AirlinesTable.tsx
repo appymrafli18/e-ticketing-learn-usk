@@ -2,6 +2,7 @@ import { IAirlines } from "@/types/airlines";
 import Image from "next/image";
 import React from "react";
 import TempLoader from "../TempLoader";
+import { Edit, Trash } from "lucide-react";
 
 interface IAirlinesTableProps {
   initialValues: IAirlines[];
@@ -42,25 +43,36 @@ const AirlinesTable = ({
                   <Image
                     src={`/img-airlines/${item.logo}`}
                     alt={`${item.name}`}
-                    width={50}
-                    height={50}
+                    width={40}
+                    height={40}
+                    className="whitespace-nowrap"
                   />
                 </td>
                 <td className="px-6 py-3 text-left">{item.name}</td>
                 <td className="px-6 py-3 text-left">{item.user.name}</td>
-                <td className="px-6 py-3 text-center">
-                  <button
+                <td className="px-6 py-3 text-center flex justify-center items-center gap-x-4">
+                  {/* <button
                     className="rounded bg-blue-500 px-4 mx-2 py-1 text-white"
                     onClick={() => onEdit(item)}
                   >
                     Edit
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     className="rounded bg-red-500 mx-2 px-4 py-1 text-white"
                     onClick={() => onDelete(item.uuid)}
                   >
                     Delete
-                  </button>
+                  </button> */}
+                  <Edit
+                    width={20}
+                    className="text-blue-500 hover:cursor-pointer"
+                    onClick={() => onEdit(item)}
+                  />
+                  <Trash
+                    width={20}
+                    className="text-red-500 hover:cursor-pointer"
+                    onClick={() => onDelete(item.uuid)}
+                  />
                 </td>
               </tr>
             ))}

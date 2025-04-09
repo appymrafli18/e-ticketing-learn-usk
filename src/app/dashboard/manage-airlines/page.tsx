@@ -87,7 +87,7 @@ const Page: React.FC = () => {
       <div className="p-6">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Airlines</h1>
-          {user && (user.role === "Admin" || user.role === "Maskapai") && (
+          {user && user.role === "Admin" && (
             <button
               className="mr-2 rounded bg-green-500 hover:bg-green-600 px-6 py-2 text-white"
               onClick={() => setIsAdd(true)}

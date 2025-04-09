@@ -1,10 +1,11 @@
 "use client";
 import LayoutDashboard from "@/components/LayoutDashboard";
 import AddFlight from "@/components/modal/AddFlight";
+import DetailFlight from "@/components/modal/DetailFlight";
 import EditFlight from "@/components/modal/EditFlight";
 import FlightTable from "@/components/table/FlightTable";
 import { ErrorAxios } from "@/lib/axios-error";
-import { FLIGHT } from "@/types/flight";
+import { FLIGHT, SelectFlight } from "@/types/flight";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
@@ -12,9 +13,10 @@ import toast, { Toaster } from "react-hot-toast";
 const Page: React.FC = () => {
   const [data, setData] = useState<FLIGHT[]>([]);
   const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
-  const [selectedData, setSelectedData] = useState<FLIGHT>();
+  const [selectedData, setSelectedData] = useState<SelectFlight>();
   const [isAdd, setIsAdd] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [isDetail, setIsDetail] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const initialData = useCallback(async () => {
@@ -22,8 +24,10 @@ const Page: React.FC = () => {
     try {
       const response = await axios.get("/api/flights/all");
 
-      if (response.status === 200) {
+      if (response.data.data.length > 0) {
         setData(response.data.data);
+      } else {
+        setErrorMessage({ error: "Tidak memiliki data penerbangan" });
       }
     } catch (error) {
       const err = ErrorAxios(error);
@@ -40,7 +44,16 @@ const Page: React.FC = () => {
 
   const onEdit = (data: FLIGHT) => {
     setIsEdit(true);
-    setSelectedData(data);
+    axios
+      .get(`/api/flights/select/${data.uuid}`)
+      .then((response) => setSelectedData(response.data.data));
+  };
+
+  const onDetail = (data: FLIGHT) => {
+    setIsDetail(true);
+    axios
+      .get(`/api/flights/select/${data.uuid}`)
+      .then((response) => setSelectedData(response.data.data));
   };
 
   const onDelete = (uuid: string) => {
@@ -74,6 +87,7 @@ const Page: React.FC = () => {
           loading={loading}
           onEdit={onEdit}
           onDelete={onDelete}
+          onDetail={onDetail}
         />
 
         {errorMessage && (
@@ -91,6 +105,14 @@ const Page: React.FC = () => {
             isOpen={isEdit}
             initialValues={selectedData}
             onClose={() => setIsEdit(false)}
+            loading={loading}
+          />
+        )}
+        {selectedData && isDetail && (
+          <DetailFlight
+            onClose={() => setIsDetail(false)}
+            isOpen={isDetail}
+            flight={selectedData}
             loading={loading}
           />
         )}

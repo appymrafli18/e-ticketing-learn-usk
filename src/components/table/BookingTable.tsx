@@ -19,7 +19,8 @@ const BookingTable = ({
         <thead>
           <tr className="bg-gray-200 text-sm leading-normal text-gray-600 uppercase">
             <th className="px-6 py-3 text-left">No</th>
-            <th className="px-6 py-3 text-left">Nama Maskapai</th>
+            <th className="px-6 py-3 text-left">Nomor Penerbangan</th>
+            <th className="px-6 py-3 text-left">Nama Pembeli</th>
             <th className="px-6 py-3 text-left">Jumlah Kursi</th>
             <th className="px-6 py-3 text-left">Total Harga</th>
             <th className="px-6 py-3 text-center">Status</th>
@@ -35,9 +36,16 @@ const BookingTable = ({
               <td className="px-6 py-3 text-left whitespace-nowrap">
                 {index + 1}
               </td>
+              <td className="px-6 py-3 text-left whitespace-nowrap">
+                {item.flight.no_penerbangan}
+              </td>
               <td className="px-6 py-3 text-left">{item.user.name}</td>
               <td className="px-6 py-3 text-left">{item.jumlah_kursi}</td>
-              <td className="px-6 py-3 text-left">{item.total_harga}</td>
+              <td className="px-6 py-3 text-left">
+                {new Intl.NumberFormat("id-ID").format(
+                  Number(item.total_harga)
+                )}
+              </td>
               <td className="px-6 py-3 text-center">
                 <p className={`status status-${item.status.toLowerCase()}`}>
                   {item.status}

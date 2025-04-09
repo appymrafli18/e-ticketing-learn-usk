@@ -3,6 +3,8 @@ export interface IAirlines {
   uuid: string;
   name: string;
   logo: string | File;
+  createdAt: string;
+  updatedAt: string;
   user: { id: number; name: string };
 }
 
