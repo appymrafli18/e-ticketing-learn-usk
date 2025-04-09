@@ -2,8 +2,17 @@ import { FormFieldProps } from "@/types/form";
 import React from "react";
 
 interface InputFieldProps extends FormFieldProps {
-  type?: "text" | "email" | "password" | "number" | "tel" | "date" | "file" | "datetime-local";
+  type?:
+    | "text"
+    | "email"
+    | "password"
+    | "number"
+    | "tel"
+    | "date"
+    | "file"
+    | "datetime-local";
   value?: string | number;
+  disable?: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   errors?: string;
@@ -22,6 +31,7 @@ export default function InputField({
   placeholder,
   required,
   type,
+  disable,
 }: InputFieldProps) {
   return (
     <div className={`mb-4 ${className}`}>
@@ -41,6 +51,7 @@ export default function InputField({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
+        disabled={disable}
         className={`"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" ${inputStyle}`}
       />
       {errors && <p className="text-red-500 text-xs mt-1">{errors}</p>}

@@ -41,7 +41,11 @@ const BookingTable = ({
               </td>
               <td className="px-6 py-3 text-left">{item.user.name}</td>
               <td className="px-6 py-3 text-left">{item.jumlah_kursi}</td>
-              <td className="px-6 py-3 text-left">{item.total_harga}</td>
+              <td className="px-6 py-3 text-left">
+                {new Intl.NumberFormat("id-ID").format(
+                  Number(item.total_harga)
+                )}
+              </td>
               <td className="px-6 py-3 text-center">
                 <p className={`status status-${item.status.toLowerCase()}`}>
                   {item.status}

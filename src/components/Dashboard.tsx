@@ -13,7 +13,12 @@ interface ICount {
 }
 
 const AdminDashboard: React.FC = () => {
-  const [count, setCount] = React.useState<ICount>();
+  const [count, setCount] = React.useState<ICount>({
+    count_user: 0,
+    count_booking: 0,
+    count_flights: 0,
+    count_revenue: 0,
+  });
   const [loading, setLoading] = React.useState<boolean>(false);
   const { user } = useMe();
 
@@ -42,9 +47,9 @@ const AdminDashboard: React.FC = () => {
 
         setCount({
           count_user: userCount?.data.data,
-          count_booking: bookingCount!.data.data,
-          count_flights: flightCount!.data.data,
-          count_revenue: revenueCount!.data.data,
+          count_booking: bookingCount?.data.data,
+          count_flights: flightCount?.data.data,
+          count_revenue: revenueCount?.data.data,
         });
       }
     } catch (error) {
@@ -65,31 +70,33 @@ const AdminDashboard: React.FC = () => {
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-6">{user?.role} Dashboard</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {user?.role === "Admin" && count?.count_user && (
+        {user && user.role === "Admin" && count && count.count_user && (
           <StatsCard
             title="Total Users"
             value={count.count_user.toString()}
             loading={loading}
           />
         )}
-        {count?.count_booking && (
+        {count && (
           <StatsCard
             title="Total Booking"
-            value={count.count_booking.toString()}
+            value={count.count_booking?.toString()}
             loading={loading}
           />
         )}
-        {count?.count_flights && (
+        {count && (
           <StatsCard
             title="Total Flights"
-            value={count.count_flights.toString()}
+            value={count.count_flights?.toString()}
             loading={loading}
           />
         )}
-        {count?.count_revenue && (
+        {count && (
           <StatsCard
             title="Total Revenue"
-            value={count.count_revenue.toString()}
+            value={`Rp ${new Intl.NumberFormat("id-ID")
+              .format(Number(count.count_revenue))
+              ?.toString()}`}
             loading={loading}
           />
         )}

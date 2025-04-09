@@ -1,15 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import NavbarWithoutLogin from "./NavbarList/NavbarWithoutLogin";
-import NavbarWithLogin from "./NavbarList/NavbarWithLogin";
-import useMe from "@/store/me";
 import axios from "axios";
 import { SelectFlight } from "@/types/flight";
 import timeArrival from "@/lib/timeArrival";
 import toast, { Toaster } from "react-hot-toast";
+import NavbarLandingPage from "./NavbarList/NavbarLandingPage";
 
 const Checkout = ({ paramsUUID }: { paramsUUID: string }) => {
-  const { user, setUser } = useMe();
   const [flight, setFlight] = useState<SelectFlight>();
   const [activeStep, setActiveStep] = useState(1);
   const [totalOrang, setTotalOrang] = useState<number>(1);
@@ -60,17 +57,13 @@ const Checkout = ({ paramsUUID }: { paramsUUID: string }) => {
         toast.success("Pembelian Ticket Pesawat telah berhasil.");
 
         setTimeout(() => {
-          window.location.href = "/";
+          window.location.href = "/suclog/my-tickets";
         }, 1500);
       }
     } catch (error) {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    setUser();
-  }, [setUser]);
 
   useEffect(() => {
     axios
@@ -81,7 +74,7 @@ const Checkout = ({ paramsUUID }: { paramsUUID: string }) => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {user ? <NavbarWithLogin /> : <NavbarWithoutLogin />}
+      <NavbarLandingPage />
       <Toaster position="top-right" reverseOrder={false} />
 
       <main className="pt-[4.5rem]">

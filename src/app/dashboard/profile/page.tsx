@@ -14,7 +14,7 @@ import EditAirlines from "@/components/modal/EditAirlines";
 import { IAirlines } from "@/types/airlines";
 
 const Page: React.FC = () => {
-  const { user, setUser } = useMe();
+  const { user } = useMe();
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
   const [showModal, setShowModal] = useState<Record<"add" | "edit", boolean>>();
@@ -38,7 +38,14 @@ const Page: React.FC = () => {
       axios
         .get(`/api/airlines/all`)
         .then((response) => setInitialValue(response.data.data[0]))
-        .catch((err) => console.error({ err }));
+        .catch((err) => {
+          const errs = ErrorAxios(err);
+          if (typeof errs === "object") {
+            setErrorMessage(errs as Record<string, string>);
+          } else {
+            setErrorMessage({ error: errs });
+          }
+        });
     }
   }, [user]);
 
@@ -165,7 +172,23 @@ const Page: React.FC = () => {
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                         Airlines Information
                       </h2>
-                      {initialValue === null && (
+
+                      {initialValue ? (
+                        <button
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                          onClick={() => handleShowModal("edit")}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                          Edit Airlines
+                        </button>
+                      ) : (
                         <button
                           className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
                           onClick={() => handleShowModal("add")}
@@ -183,22 +206,6 @@ const Page: React.FC = () => {
                             />
                           </svg>
                           Tambah Airlines
-                        </button>
-                      )}
-                      {initialValue !== null && (
-                        <button
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
-                          onClick={() => handleShowModal("edit")}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                          </svg>
-                          Edit Airlines
                         </button>
                       )}
                     </div>
@@ -246,7 +253,6 @@ const Page: React.FC = () => {
       {user && user.role === "Maskapai" && showModal && showModal.add && (
         <AddAirlines
           isOpen={showModal.add}
-          role={user?.role || ""}
           onClose={() => handleClose("add")}
           loading={false}
         />

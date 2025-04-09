@@ -115,7 +115,7 @@ const airlineServices = {
 
       await prisma_connection.airlines.create({
         data: {
-          name: body.name,
+          name: user.role === "Maskapai" ? user.name : body.name,
           logo: fileName,
           userId,
         },

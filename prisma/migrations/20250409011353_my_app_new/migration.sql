@@ -2,7 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('Admin', 'User', 'Maskapai');
 
 -- CreateEnum
-CREATE TYPE "Status" AS ENUM ('Pending', 'Confirmed', 'Canceled');
+CREATE TYPE "Status" AS ENUM ('Pending', 'Confirmed', 'Cancelled');
 
 -- CreateEnum
 CREATE TYPE "TypeReport" AS ENUM ('Transaksi', 'Penerbangan', 'Keuangan', 'Lainnya');
@@ -40,6 +40,7 @@ CREATE TABLE "Flights" (
     "id" SERIAL NOT NULL,
     "uuid" TEXT NOT NULL,
     "no_penerbangan" TEXT NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "kota_keberangkatan" TEXT NOT NULL,
     "kota_tujuan" TEXT NOT NULL,
     "waktu_keberangkatan" TIMESTAMP(3) NOT NULL,
@@ -115,6 +116,9 @@ CREATE UNIQUE INDEX "Airlines_userId_key" ON "Airlines"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Flights_uuid_key" ON "Flights"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Flights_no_penerbangan_key" ON "Flights"("no_penerbangan");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Booking_uuid_key" ON "Booking"("uuid");

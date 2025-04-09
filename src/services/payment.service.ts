@@ -137,18 +137,10 @@ const paymentServices = {
         },
       });
 
-      if (!totalRevenue)
-        return {
-          statusCode: 404,
-          message: "Revenue not found",
-          data: 0,
-          error: "Tidak memiliki data revenue",
-        };
-
       return {
         statusCode: 200,
         message: "Success",
-        data: totalRevenue._sum.jumlah_pembayaran,
+        data: totalRevenue._sum.jumlah_pembayaran || 0,
       };
     } catch (error) {
       return {

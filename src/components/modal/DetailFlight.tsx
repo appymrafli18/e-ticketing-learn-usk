@@ -97,7 +97,7 @@ const DetailFlight: React.FC<DetailFlightProps> = ({
           </div>
         </div>
 
-        {flight.bookings.length > 0 && (
+        {/* {flight.bookings && flight.bookings.length > 0 && (
           <div className="mt-6">
             <h3 className="font-semibold text-lg mb-3">Bookings</h3>
             <div className="space-y-3">
@@ -150,7 +150,7 @@ const DetailFlight: React.FC<DetailFlightProps> = ({
               ))}
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </DetailModal>
   );

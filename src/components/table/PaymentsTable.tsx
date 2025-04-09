@@ -50,7 +50,9 @@ const PaymentsTable = ({
                 </td>
                 <td className="px-6 py-3 text-left">{item.payment_method}</td>
                 <td className="px-6 py-3 text-left">
-                  {item.jumlah_pembayaran}
+                  {new Intl.NumberFormat("id-ID").format(
+                    Number(item.jumlah_pembayaran)
+                  )}
                 </td>
                 <td className="px-6 py-3 text-center">
                   <p className={`status status-${item.status.toLowerCase()}`}>

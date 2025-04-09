@@ -76,13 +76,6 @@ const bookingServices = {
         },
       });
 
-      if (!totalBooking)
-        return {
-          statusCode: 404,
-          message: "Total Booking Not Found",
-          data: 0,
-        };
-
       return {
         statusCode: 200,
         message: "Success",

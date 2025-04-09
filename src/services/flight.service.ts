@@ -52,8 +52,13 @@ const flightServices = {
     destinationCity?: string
   ) => {
     try {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
       const response = await prisma_connection.flights.findMany({
         where: {
+          waktu_keberangkatan: {
+            gte: now,
+          },
           airlines: {
             name: {
               contains: airlinesName,
@@ -116,7 +121,28 @@ const flightServices = {
         };
       }
 
-      return { statusCode: 200, message: "Success", data: response };
+      const filteredResponseWaktu = response.filter((flight) => {
+        const departureDate = new Date(flight.waktu_keberangkatan);
+        const maxAllowedTime = new Date(
+          departureDate.getTime() - 24 * 60 * 60 * 1000
+        );
+        maxAllowedTime.setHours(0, 0, 0, 0);
+
+        return now <= maxAllowedTime;
+      });
+
+      if (filteredResponseWaktu.length < 1)
+        return {
+          statusCode: 404,
+          message: "Success",
+          error: "Flight Not Found",
+        };
+
+      return {
+        statusCode: 200,
+        message: "Success",
+        data: filteredResponseWaktu,
+      };
     } catch (error) {
       return {
         statusCode: 400,
@@ -140,13 +166,6 @@ const flightServices = {
           }),
         },
       });
-
-      if (!totalFlight)
-        return {
-          statusCode: 404,
-          message: "Total Flight Not Found",
-          data: 0,
-        };
 
       return { statusCode: 200, message: "Success", data: totalFlight };
     } catch (error) {

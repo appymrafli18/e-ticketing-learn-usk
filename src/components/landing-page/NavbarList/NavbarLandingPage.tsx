@@ -1,18 +1,29 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import axios from "axios";
 import { ErrorAxios } from "@/lib/axios-error";
 import Link from "next/link";
+import useMe from "@/store/me";
 
-const NavbarWithLogin = () => {
+const NavbarLandingPage = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, setUser } = useMe();
+
+  const checkLogin = useCallback(() => {
+    if (!user) {
+      setUser();
+    }
+  }, [user, setUser]);
+
+  useEffect(() => {
+    checkLogin();
+  }, [checkLogin]);
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post("/api/auth/logout");
-      console.log({ logout: response });
-      if (response.status === 200) window.location.reload();
+      await axios.post("/api/auth/logout");
+      window.location.reload();
     } catch (error) {
       const err = ErrorAxios(error);
       console.log(err);
@@ -52,18 +63,29 @@ const NavbarWithLogin = () => {
         </div>
 
         <div className="hidden md:flex space-x-4">
-          <Link
-            href="/suclog/my-tickets"
-            className="text-white border border-white px-2 py-1 hover:bg-white hover:text-black rounded border-transparent transition-all duration-300 flex items-center justify-center"
-          >
-            My Tickets
-          </Link>
-          <button
-            className="text-white px-4 py-2 rounded bg-red-500 hover:bg-red-600 border border-red-500"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+          {user ? (
+            <>
+              <Link
+                href="/suclog/my-tickets"
+                className="text-white border border-white px-2 py-1 hover:bg-white hover:text-black rounded border-transparent transition-all duration-300 flex items-center justify-center"
+              >
+                My Tickets
+              </Link>
+              <button
+                className="text-white px-4 py-2 rounded bg-red-500 hover:bg-red-600 border border-red-500"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="text-white border border-white px-4 py-2 rounded hover:bg-white hover:text-blue-600"
+            >
+              Login
+            </Link>
+          )}
         </div>
 
         <button
@@ -100,16 +122,34 @@ const NavbarWithLogin = () => {
           >
             Contact
           </a>
-          <button
-            onClick={handleLogout}
-            className="text-white px-4 py-2 w-full text-center rounded mt-2 bg-red-500 hover:bg-red-600 transition-all duration-300"
-          >
-            Logout
-          </button>
+
+          {user ? (
+            <>
+              <Link
+                href="/suclog/my-tickets"
+                className="text-white border border-white px-2 py-1 hover:bg-white hover:text-black rounded border-transparent transition-all duration-300 flex items-center justify-center"
+              >
+                My Tickets
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-white px-4 py-2 w-full text-center rounded mt-2 bg-red-500 hover:bg-red-600 transition-all duration-300"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="text-white px-4 py-2 w-full border-white border text-center rounded mt-2 hover:bg-white hover:text-blue-600 transition-all duration-300"
+            >
+              Login
+            </Link>
+          )}
         </div>
       )}
     </nav>
   );
 };
 
-export default NavbarWithLogin;
+export default NavbarLandingPage;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-// import { jwtVerify } from "jose";
+import { jwtVerify } from "jose";
 
 export async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith("/dashboard")) {
@@ -16,7 +16,15 @@ export async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith("/suclog")) {
     const getToken = req.cookies.get("token")?.value;
     if (!getToken) return NextResponse.redirect(new URL("/login", req.url));
-    return null;
+
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const token = await jwtVerify(getToken, secret);
+
+    if (token && token.payload.role !== "User") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    } else {
+      return null;
+    }
   }
 
   if (req.nextUrl.pathname.startsWith("/login")) {

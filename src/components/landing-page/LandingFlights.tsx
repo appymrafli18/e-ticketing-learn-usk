@@ -1,8 +1,5 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import NavbarWithoutLogin from "./NavbarList/NavbarWithoutLogin";
-import useMe from "@/store/me";
-import NavbarWithLogin from "./NavbarList/NavbarWithLogin";
 import axios from "axios";
 import { IAirlines } from "@/types/airlines";
 import { FLIGHT } from "@/types/payment";
@@ -11,6 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ErrorAxios } from "@/lib/axios-error";
 import useFlightStore from "@/store/booking";
 import timeArrival from "@/lib/timeArrival";
+import NavbarLandingPage from "./NavbarList/NavbarLandingPage";
 
 interface ISorting {
   sortPrice?: string;
@@ -21,7 +19,6 @@ interface ISorting {
 }
 
 const LandingFlights = () => {
-  const { user, setUser } = useMe();
   const router = useRouter();
   const { setSelectedFlight } = useFlightStore();
   const [airlines, setAirlines] = useState<IAirlines[]>([]);
@@ -29,12 +26,6 @@ const LandingFlights = () => {
   const [errorMessage, setErrorMessage] = useState<Record<string, string>>();
   const searchParams = useSearchParams();
   const [sorting, setSorting] = useState<ISorting>();
-
-  const checkLogin = useCallback(() => {
-    if (!user) {
-      setUser();
-    }
-  }, [user, setUser]);
 
   const initialValue = async () => {
     try {
@@ -110,10 +101,6 @@ const LandingFlights = () => {
   };
 
   useEffect(() => {
-    checkLogin();
-  }, [checkLogin]);
-
-  useEffect(() => {
     filterFlight();
   }, [filterFlight]);
 
@@ -123,7 +110,7 @@ const LandingFlights = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {user ? <NavbarWithLogin /> : <NavbarWithoutLogin />}
+      <NavbarLandingPage />
       <main>
         {/* Hero Section */}
         <header
