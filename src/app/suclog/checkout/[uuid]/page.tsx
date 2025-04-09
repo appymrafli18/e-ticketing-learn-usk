@@ -1,8 +1,8 @@
 import Checkout from "@/components/landing-page/Checkout";
 import React from "react";
 
-const Page = ({ params }: { params: { uuid: string } }) => {
-  const { uuid } = params;
+const Page = async ({ params }: { params: Promise<{ uuid: string }> }) => {
+  const { uuid } = await params;
 
   return (
     <>

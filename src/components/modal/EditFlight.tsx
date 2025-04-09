@@ -1,5 +1,5 @@
 "use client";
-import { FLIGHT, SelectFlight } from "@/types/flight";
+import { SelectFlight } from "@/types/flight";
 import FormComponent from "../form/FormComponent";
 import InputField from "../input/InputField";
 import getCurrentDateTime from "@/lib/nowDate";
@@ -24,12 +24,11 @@ export default function EditFlight({
   const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
 
   const handleSubmit = async (data: SelectFlight) => {
-
     const updateData = {
       no_penerbangan: data.no_penerbangan,
       kota_keberangkatan: data.kota_keberangkatan,
       kota_tujuan: data.kota_tujuan,
-      waktu_keberangkatan:getCurrentDateTime(data.waktu_keberangkatan), 
+      waktu_keberangkatan: getCurrentDateTime(data.waktu_keberangkatan),
       waktu_kedatangan: getCurrentDateTime(data.waktu_kedatangan),
       harga: data.harga,
       kapasitas_kursi: data.kapasitas_kursi,

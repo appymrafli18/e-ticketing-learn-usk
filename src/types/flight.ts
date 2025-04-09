@@ -2,6 +2,10 @@ export interface FLIGHT {
   id?: number;
   uuid?: string;
   no_penerbangan: string;
+  waktu_keberangkatan?: string;
+  waktu_kedatangan?: string;
+  kapasitas_kursi?: number;
+  kursi_tersedia?: number;
   kota_keberangkatan: string;
   kota_tujuan: string;
   harga: number;

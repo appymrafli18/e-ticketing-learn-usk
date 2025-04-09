@@ -48,7 +48,6 @@ model User {
 
   // relasi one-to-many
   bookings Booking[]
-  Report   Reports[]
 }
 
 model Airlines {
@@ -107,9 +106,8 @@ model Booking {
   flight   Flights @relation(fields: [flightId], references: [id])
 
   // relasi one-to-many dengan tbl_user
-  userId      Int
-  user        User      @relation(fields: [userId], references: [id])
-  tbl_reports Reports[]
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }
 
 model Payment {
@@ -124,28 +122,4 @@ model Payment {
   // relasi one-to-one dengan tbl_bookings
   bookingId Int     @unique
   booking   Booking @relation(fields: [bookingId], references: [id])
-
-  // Relasi one-to-many dengan tbl_reports (satu pembayaran bisa memiliki banyak laporan)
-  tbl_reports Reports[]
-}
-
-model Reports {
-  id        Int        @id @default(autoincrement())
-  uuid      String     @unique @default(uuid())
-  type      TypeReport // Enum untuk jenis laporan
-  data      Json // Data laporan dalam format JSON
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  // Relasi many-to-one
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  // Relasi many-to-one
-  bookingId Int?
-  booking   Booking? @relation(fields: [bookingId], references: [id])
-
-  // Relasi many-to-one
-  paymentId Int?
-  payment   Payment? @relation(fields: [paymentId], references: [id])
 }

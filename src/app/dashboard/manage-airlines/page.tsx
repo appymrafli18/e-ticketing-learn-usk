@@ -108,7 +108,6 @@ const Page: React.FC = () => {
         <AddAirlines
           isOpen={isAdd}
           loading={loading}
-          role={user!.role}
           onClose={() => setIsAdd(false)}
         />
       )}
