@@ -4,8 +4,8 @@ import LayoutDashboard from "@/components/LayoutDashboard";
 import BookingTable from "@/components/table/BookingTable";
 import {ErrorAxios} from "@/lib/axios-error";
 import {BOOKING} from "@/types/booking";
-import axios, {AxiosError} from "axios";
-import {FormEvent, useCallback, useEffect, useState} from "react";
+import axios from "axios";
+import React, {FormEvent, useCallback, useEffect, useState} from "react";
 
 const Page: React.FC = () => {
     const [data, setData] = useState<BOOKING[]>();
@@ -63,7 +63,7 @@ const Page: React.FC = () => {
     }
 
     useEffect(() => {
-      initialData();
+      initialData().catch(error => console.log(error));
     }, [initialData]);
 
     return (
