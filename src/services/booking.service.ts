@@ -1,6 +1,6 @@
-import { prisma_connection } from "@/lib/prisma-orm";
-import { ICreateBooking } from "@/types/booking";
-import { IPayload } from "@/types/jwt";
+import {prisma_connection} from "@/lib/prisma-orm";
+import {ICreateBooking} from "@/types/booking";
+import {IPayload} from "@/types/jwt";
 
 const bookingServices = {
   getAllBookings: async (user: IPayload) => {
@@ -15,12 +15,12 @@ const bookingServices = {
       });
 
       if (!searchAirlines && user.role === "Maskapai")
-        return { statusCode: 404, message: "Airlines not found" };
+        return {statusCode: 404, message: "Airlines not found"};
 
       const airlinesId = searchAirlines?.id;
       const response = await prisma_connection.booking.findMany({
         where: {
-          ...(user.role === "User" && { userId: user.id }),
+          ...(user.role === "User" && {userId: user.id}),
           flight: {
             airlinesId: airlinesId,
           },
@@ -46,9 +46,8 @@ const bookingServices = {
         },
       });
 
-      if (!response) return { statusCode: 404, message: "Bookings not found" };
-
-      return { statusCode: 200, message: "Success", data: response };
+      if (!response || response.length < 1) return {statusCode: 404, message: "Bookings not found"};
+      return {statusCode: 200, message: "Success", data: response};
     } catch (error) {
       return {
         statusCode: 400,
@@ -60,7 +59,7 @@ const bookingServices = {
 
   getTotalBooking: async (user: IPayload) => {
     if (user.role === "User")
-      return { statusCode: 401, message: "Unauthorized" };
+      return {statusCode: 401, message: "Unauthorized"};
 
     try {
       const totalBooking = await prisma_connection.booking.count({
@@ -90,6 +89,61 @@ const bookingServices = {
     }
   },
 
+  getFilterBookings: async (user: IPayload, no_flight?: string, no_booking?: string) => {
+    if (user.role === "User") return {statusCode: 401, message: "Unauthorized"};
+
+    try {
+      const response = await prisma_connection.booking.findMany({
+        where: {
+          ...(user.role === "Maskapai" && {userId: user.id}),
+          ...(no_flight && {
+            flight: {
+              no_penerbangan: no_flight
+            },
+
+          }),
+          ...(no_booking && {
+            uuid: {
+              contains: no_booking,
+            }
+          }),
+        },
+        omit: {
+          flightId: true,
+          userId: true
+        },
+        include: {
+          flight: {
+            select: {
+              no_penerbangan: true,
+            }
+          },
+          user: {
+            select: {
+              name: true
+            }
+          }
+        }
+      })
+
+      if (!response) return {statusCode: 404, message: "Bookings not found"};
+
+      if (response.length < 1) return {statusCode: 404, message: "Does not have booking data"};
+
+      return {
+        statusCode: 200,
+        message: "Success",
+        data: response,
+      }
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: "Terjadi kesalahan Internal",
+        error: (error as Error).message,
+      }
+    }
+  },
+
   getOneBooking: async (uuid: string, user: IPayload) => {
     try {
       const searchAirlines = await prisma_connection.airlines.findUnique({
@@ -102,13 +156,13 @@ const bookingServices = {
       });
 
       if (!searchAirlines && user.role === "Maskapai")
-        return { statusCode: 404, message: "Airlines not found" };
+        return {statusCode: 404, message: "Airlines not found"};
 
       const airlinesId = searchAirlines?.id;
       const response = await prisma_connection.booking.findUnique({
         where: {
           uuid,
-          ...(user.role === "User" && { userId: user.id }),
+          ...(user.role === "User" && {userId: user.id}),
           flight: {
             airlinesId: airlinesId,
           },
@@ -131,9 +185,9 @@ const bookingServices = {
         },
       });
 
-      if (!response) return { statusCode: 404, message: "Bookings not found" };
+      if (!response) return {statusCode: 404, message: "Bookings not found"};
 
-      return { statusCode: 200, message: "Success", data: response };
+      return {statusCode: 200, message: "Success", data: response};
     } catch (error) {
       return {
         statusCode: 400,
@@ -145,7 +199,7 @@ const bookingServices = {
 
   createBookings: async (body: ICreateBooking, user: IPayload) => {
     if (user.role === "Maskapai")
-      return { statusCode: 401, message: "Unauthorized" };
+      return {statusCode: 401, message: "Unauthorized"};
     try {
       const searchFlights = await prisma_connection.flights.findUnique({
         where: {
@@ -154,7 +208,7 @@ const bookingServices = {
       });
 
       if (!searchFlights)
-        return { statusCode: 404, message: "Flights not found" };
+        return {statusCode: 404, message: "Flights not found"};
 
       const data = {
         jumlah_kursi: Number(body.jumlah_kursi),
@@ -164,7 +218,7 @@ const bookingServices = {
       };
 
       if (searchFlights.kursi_tersedia < data.jumlah_kursi)
-        return { statusCode: 400, message: "Kursi Tersedia Kurang" };
+        return {statusCode: 400, message: "Kursi Tersedia Kurang"};
 
       await prisma_connection.flights.update({
         where: {
@@ -206,7 +260,7 @@ const bookingServices = {
     user: IPayload
   ) => {
     if (user.role === "Maskapai")
-      return { statusCode: 401, message: "Unauthorized" };
+      return {statusCode: 401, message: "Unauthorized"};
     try {
       const searchFlights = await prisma_connection.flights.findUnique({
         where: {
@@ -218,7 +272,7 @@ const bookingServices = {
       });
 
       if (!searchFlights)
-        return { statusCode: 404, message: "Flights not found" };
+        return {statusCode: 404, message: "Flights not found"};
       if (searchFlights.kursi_tersedia < Number(body.jumlah_kursi))
         return {
           statusCode: 400,
@@ -228,12 +282,12 @@ const bookingServices = {
       const searchBookings = await prisma_connection.booking.findUnique({
         where: {
           uuid,
-          ...(user.role === "User" && { userId: user.id }),
+          ...(user.role === "User" && {userId: user.id}),
         },
       });
 
       if (!searchBookings)
-        return { statusCode: 404, message: "Bookings not found" };
+        return {statusCode: 404, message: "Bookings not found"};
 
       const data = {
         jumlah_kursi: Number(body.jumlah_kursi),
@@ -249,7 +303,7 @@ const bookingServices = {
         data,
       });
 
-      return { statusCode: 200, message: "Success updated booking!" };
+      return {statusCode: 200, message: "Success updated booking!"};
     } catch (error) {
       return {
         statusCode: 400,
@@ -261,16 +315,16 @@ const bookingServices = {
 
   deleteBookings: async (uuid: string, user: IPayload) => {
     if (user.role === "Maskapai")
-      return { statusCode: 401, message: "Unauthorized" };
+      return {statusCode: 401, message: "Unauthorized"};
     try {
       const search = await prisma_connection.booking.findUnique({
         where: {
           uuid,
-          ...(user.role === "User" && { userId: user.id }),
+          ...(user.role === "User" && {userId: user.id}),
         },
       });
 
-      if (!search) return { statusCode: 404, message: "Bookings not found" };
+      if (!search) return {statusCode: 404, message: "Bookings not found"};
 
       await prisma_connection.booking.delete({
         where: {
@@ -278,7 +332,7 @@ const bookingServices = {
         },
       });
 
-      return { statusCode: 200, message: "Success Deleted Bookings" };
+      return {statusCode: 200, message: "Success Deleted Bookings"};
     } catch (error) {
       return {
         statusCode: 400,

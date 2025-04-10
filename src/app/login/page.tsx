@@ -62,6 +62,7 @@ const Page = () => {
                   name="email"
                   onChange={handleChange}
                   value={formData.email}
+                  autoComplete={true}
                   placeholder="Masukan email kamu"
                   required
                   errors={errorMessage?.email}
@@ -72,6 +73,7 @@ const Page = () => {
                   label="Password"
                   name="password"
                   onChange={handleChange}
+                  autoComplete={true}
                   value={formData.password}
                   placeholder="Masukan password kamu"
                   required

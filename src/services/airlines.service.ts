@@ -1,6 +1,6 @@
-import { prisma_connection } from "@/lib/prisma-orm";
-import { IBodyAirlines } from "@/types/airlines";
-import { IPayload } from "@/types/jwt";
+import {prisma_connection} from "@/lib/prisma-orm";
+import {IBodyAirlines} from "@/types/airlines";
+import {IPayload} from "@/types/jwt";
 import fs from "fs";
 import path from "path";
 
@@ -9,7 +9,7 @@ const airlineServices = {
     try {
       const response = await prisma_connection.airlines.findMany({
         where: {
-          ...(user.role === "Maskapai" && { userId: user.id }),
+          ...(user.role === "Maskapai" && {userId: user.id}),
         },
         omit: {
           userId: true,
@@ -26,9 +26,9 @@ const airlineServices = {
       });
 
       if (!response.length)
-        return { statusCode: 404, message: "Airlines not found" };
+        return {statusCode: 404, message: "Airlines not found"};
 
-      return { statusCode: 200, message: "Success", data: response };
+      return {statusCode: 200, message: "Success", data: response};
     } catch (error) {
       return {
         statusCode: 400,
@@ -43,7 +43,7 @@ const airlineServices = {
       const response = await prisma_connection.airlines.findUnique({
         where: {
           uuid,
-          ...(user.role === "Maskapai" && { userId: user.id }),
+          ...(user.role === "Maskapai" && {userId: user.id}),
         },
         omit: {
           userId: true,
@@ -59,9 +59,9 @@ const airlineServices = {
         },
       });
 
-      if (!response) return { statusCode: 404, message: "Airlines not found" };
+      if (!response) return {statusCode: 404, message: "Airlines not found"};
 
-      return { statusCode: 200, message: "Success", data: response };
+      return {statusCode: 200, message: "Success", data: response};
     } catch (error) {
       return {
         statusCode: 400,
@@ -73,10 +73,10 @@ const airlineServices = {
 
   createAirlines: async (body: IBodyAirlines, user: IPayload) => {
     if (user.role === "User")
-      return { statusCode: 401, message: "Unauthorized" };
+      return {statusCode: 401, message: "Unauthorized"};
 
     try {
-      if (!body.logo) return { statusCode: 400, message: "Image is required" };
+      if (!body.logo) return {statusCode: 400, message: "Image is required"};
 
       if (user.role === "Maskapai") {
         body.userId = user.id;
@@ -93,7 +93,7 @@ const airlineServices = {
       });
 
       if (search)
-        return { statusCode: 400, message: "Only one airlines per user" };
+        return {statusCode: 400, message: "Only one airlines per user"};
 
       const file = body.logo as File;
       const fileName = `${file.lastModified}-${file.name}`;
@@ -111,7 +111,15 @@ const airlineServices = {
         };
 
       if (file.length > 1)
-        return { statusCode: 400, message: "Image is required" };
+        return {statusCode: 400, message: "Image is required"};
+
+
+      if (!fs.existsSync("public/img-airlines")) {
+        fs.mkdirSync("public/img-airlines", {recursive: true});
+      }
+
+      const filePath = path.resolve("public/img-airlines/", fileName);
+      fs.writeFileSync(filePath, Buffer.from(await file.arrayBuffer()));
 
       await prisma_connection.airlines.create({
         data: {
@@ -120,13 +128,6 @@ const airlineServices = {
           userId,
         },
       });
-
-      if (!fs.existsSync("public/img-airlines")) {
-        fs.mkdirSync("public/img-airlines", { recursive: true });
-      }
-
-      const filePath = path.resolve("public/img-airlines/", fileName);
-      fs.writeFileSync(filePath, Buffer.from(await file.arrayBuffer()));
 
       return {
         statusCode: 201,
@@ -143,7 +144,7 @@ const airlineServices = {
 
   updateAirlines: async (uuid: string, body: IBodyAirlines, user: IPayload) => {
     if (user.role === "User")
-      return { statusCode: 401, message: "Unauthorized" };
+      return {statusCode: 401, message: "Unauthorized"};
 
     try {
       const search = await prisma_connection.airlines.findUnique({
@@ -152,7 +153,7 @@ const airlineServices = {
         },
       });
 
-      if (!search) return { statusCode: 404, message: "Airlines not found" };
+      if (!search) return {statusCode: 404, message: "Airlines not found"};
 
       const file = body.logo as File;
       let fileName;
@@ -180,7 +181,7 @@ const airlineServices = {
       }
 
       await prisma_connection.airlines.update({
-        where: { id: search.id },
+        where: {id: search.id},
         data: {
           name: body.name || search.name,
           logo: fileName || search.logo,
@@ -202,7 +203,7 @@ const airlineServices = {
 
   deleteAirlines: async (uuid: string, user: IPayload) => {
     if (user.role !== "Admin")
-      return { statusCode: 401, message: "Unauthorized" };
+      return {statusCode: 401, message: "Unauthorized"};
 
     try {
       const search = await prisma_connection.airlines.findUnique({
@@ -211,7 +212,7 @@ const airlineServices = {
         },
       });
 
-      if (!search) return { statusCode: 404, message: "Airlines not found" };
+      if (!search) return {statusCode: 404, message: "Airlines not found"};
 
       await prisma_connection.airlines.delete({
         where: {
@@ -221,7 +222,7 @@ const airlineServices = {
 
       fs.unlinkSync("public/img-airlines/" + search.logo);
 
-      return { statusCode: 200, message: "Success deleted data airlines" };
+      return {statusCode: 200, message: "Success deleted data airlines"};
     } catch (error) {
       return {
         statusCode: 400,

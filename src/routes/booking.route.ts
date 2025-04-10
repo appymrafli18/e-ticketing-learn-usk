@@ -6,6 +6,7 @@ const bookingRoutes = new Elysia({ prefix: "/bookings" });
 
 bookingRoutes.onBeforeHandle(middlewareVerifyToken);
 bookingRoutes.get("/all", bookingController.getAllBookings);
+bookingRoutes.get("/filter", bookingController.getFilterBookings);
 bookingRoutes.get("/count", bookingController.getTotalBooking);
 bookingRoutes.get("/select/:uuid", bookingController.getOneBooking);
 bookingRoutes.post("/create", bookingController.createBookings);

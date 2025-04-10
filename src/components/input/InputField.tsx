@@ -1,4 +1,4 @@
-import { FormFieldProps } from "@/types/form";
+import {FormFieldProps} from "@/types/form";
 import React from "react";
 
 interface InputFieldProps extends FormFieldProps {
@@ -14,25 +14,29 @@ interface InputFieldProps extends FormFieldProps {
   value?: string | number;
   disable?: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  autoComplete?: boolean;
   placeholder?: string;
   errors?: string;
   inputStyle?: string;
   className?: string;
+  min?: string;
 }
 
 export default function InputField({
-  label,
-  name,
-  onChange,
-  value,
-  className,
-  errors,
-  inputStyle,
-  placeholder,
-  required,
-  type,
-  disable,
-}: InputFieldProps) {
+                                     label,
+                                     name,
+                                     onChange,
+                                     value,
+                                     className,
+                                     errors,
+                                     inputStyle,
+                                     placeholder,
+                                     required,
+                                     autoComplete = true,
+                                     type,
+                                     min,
+                                     disable,
+                                   }: InputFieldProps) {
   return (
     <div className={`mb-4 ${className}`}>
       <label
@@ -47,10 +51,11 @@ export default function InputField({
         id={name}
         name={name}
         value={type === "file" ? undefined : value}
-        autoComplete="off"
+        autoComplete={autoComplete ? "on" : "off"}
         onChange={onChange}
         placeholder={placeholder}
         required={required}
+        min={min}
         disabled={disable}
         className={`"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" ${inputStyle}`}
       />

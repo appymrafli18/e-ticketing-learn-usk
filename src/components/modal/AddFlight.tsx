@@ -1,12 +1,12 @@
 "use client";
-import { FLIGHT } from "@/types/flight";
+import {FLIGHT} from "@/types/flight";
 import FormComponent from "../form/FormComponent";
 import InputField from "../input/InputField";
 import getCurrentDateTime from "@/lib/nowDate";
-import { useState } from "react";
-import { ErrorAxios } from "@/lib/axios-error";
+import {useState} from "react";
+import {ErrorAxios} from "@/lib/axios-error";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
+import toast, {Toaster} from "react-hot-toast";
 
 interface IAddFlightProps {
   isOpen: boolean;
@@ -15,10 +15,10 @@ interface IAddFlightProps {
 }
 
 export default function AddFlight({
-  isOpen,
-  onClose,
-  loading,
-}: IAddFlightProps) {
+                                    isOpen,
+                                    onClose,
+                                    loading,
+                                  }: IAddFlightProps) {
   const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
 
   const initialValues: FLIGHT = {
@@ -60,7 +60,7 @@ export default function AddFlight({
       if (typeof err === "object") {
         setErrorMessage(err as Record<string, string>);
       } else {
-        setErrorMessage({ error: err });
+        setErrorMessage({error: err});
       }
     }
   };
@@ -69,7 +69,7 @@ export default function AddFlight({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="top-right" reverseOrder={false}/>
       <div className="rounded-lg shadow-lg p-6 w-full max-w-md bg-white">
         <h2 className="text-lg font-semibold mb-4">Tambah Flight</h2>
 
@@ -81,7 +81,7 @@ export default function AddFlight({
           isCancel={true}
           submitLabel="Simpan"
         >
-          {({ formData, handleChange }) => (
+          {({formData, handleChange}) => (
             <>
               <InputField
                 label="No Penerbangan"

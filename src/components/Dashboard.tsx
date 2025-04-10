@@ -70,10 +70,10 @@ const AdminDashboard: React.FC = () => {
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-6">{user?.role} Dashboard</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {user && user.role === "Admin" && count && count.count_user && (
+        {user && user.role === "Admin" && count && (
           <StatsCard
             title="Total Users"
-            value={count.count_user.toString()}
+            value={count.count_user?.toString() || "0"}
             loading={loading}
           />
         )}
