@@ -275,6 +275,7 @@ const Checkout = ({ paramsUUID }: { paramsUUID: string }) => {
                       }}
                       className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
+                    {flight && totalOrang > flight.kursi_tersedia && <p className="text-red-500 text-sm mt-2">Kursi Yang Tersedia Hanya {flight.kursi_tersedia}</p>}
                   </div>
                 )}
 

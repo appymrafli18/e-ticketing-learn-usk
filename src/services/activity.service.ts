@@ -7,7 +7,11 @@ export const activityService = {
       return {statusCode: 401, message: "Unauthorized"};
 
     try {
-      const response = await prisma_connection.bookingActivity.findMany();
+      const response = await prisma_connection.bookingActivity.findMany({
+        orderBy: {
+          id: "desc"
+        }
+      });
 
       if (!response || response.length < 1) return {statusCode: 404, message: "Activity Not Found"};
 
