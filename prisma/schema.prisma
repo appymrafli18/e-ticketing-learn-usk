@@ -123,3 +123,9 @@ model Payment {
   bookingId Int     @unique
   booking   Booking @relation(fields: [bookingId], references: [id])
 }
+
+model BookingActivity {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+}

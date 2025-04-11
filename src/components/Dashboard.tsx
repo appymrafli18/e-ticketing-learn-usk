@@ -1,8 +1,8 @@
 "use client";
-import React, { useCallback, useEffect } from "react";
+import React, {useCallback, useEffect} from "react";
 import StatsCard from "./StatsCard";
 import axios from "axios";
-import { ErrorAxios } from "@/lib/axios-error";
+import {ErrorAxios} from "@/lib/axios-error";
 import useMe from "@/store/me";
 
 interface ICount {
@@ -10,6 +10,7 @@ interface ICount {
   count_booking: number;
   count_flights: number;
   count_revenue: number;
+  activity?: Record<string, string | number>[]
 }
 
 const AdminDashboard: React.FC = () => {
@@ -20,7 +21,7 @@ const AdminDashboard: React.FC = () => {
     count_revenue: 0,
   });
   const [loading, setLoading] = React.useState<boolean>(false);
-  const { user } = useMe();
+  const {user} = useMe();
 
   const handleView = useCallback(async () => {
     setLoading(true);
@@ -30,19 +31,21 @@ const AdminDashboard: React.FC = () => {
         const requests =
           user.role === "Admin"
             ? [
-                axios.get("/api/user/count"),
-                axios.get("/api/bookings/count"),
-                axios.get("/api/flights/count"),
-                axios.get("/api/payments/count"),
-              ]
+              axios.get("/api/user/count"),
+              axios.get("/api/bookings/count"),
+              axios.get("/api/flights/count"),
+              axios.get("/api/payments/count"),
+              axios.get("/api/recently/all"),
+            ]
             : [
-                null,
-                axios.get("/api/bookings/count"),
-                axios.get("/api/flights/count"),
-                axios.get("/api/payments/count"),
-              ];
+              null,
+              axios.get("/api/bookings/count"),
+              axios.get("/api/flights/count"),
+              axios.get("/api/payments/count"),
+              null
+            ];
 
-        const [userCount, bookingCount, flightCount, revenueCount] =
+        const [userCount, bookingCount, flightCount, revenueCount, activity] =
           await Promise.all(requests);
 
         setCount({
@@ -50,6 +53,7 @@ const AdminDashboard: React.FC = () => {
           count_booking: bookingCount?.data.data,
           count_flights: flightCount?.data.data,
           count_revenue: revenueCount?.data.data,
+          activity: activity?.data.data,
         });
       }
     } catch (error) {
@@ -101,16 +105,22 @@ const AdminDashboard: React.FC = () => {
           />
         )}
       </div>
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-4">Recent Activities</h3>
-        <div className="dark:bg-[var(--foreground)] p-6 rounded-lg shadow-md">
-          <ul>
-            <li className="border-b py-2">User John Doe booked a flight.</li>
-            <li className="border-b py-2">Flight XYZ123 was added.</li>
-            <li className="border-b py-2">Revenue increased by 15%.</li>
-          </ul>
-        </div>
-      </div>
+      {
+        user && user.role === "Admin" && <div className="mt-8">
+              <h3 className="text-xl font-semibold mb-4">Recent Activities</h3>
+          {
+            count && count.activity && count.activity.map((values, index) => (
+              <div
+                className="dark:bg-[var(--foreground)] p-6 rounded-lg shadow-md" key={index}>
+                <ul>
+                  <li className="border-b py-2">{values.message ? values.message : "Not Have Recently"}</li>
+                </ul>
+              </div>
+            ))
+          }
+          </div>
+      }
+
     </div>
   );
 };

@@ -1,12 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import { USER } from "@/types/user";
+import {USER} from "@/types/user";
 import Image from "next/image";
 import {
   Bookmark,
   DollarSign,
   Fan,
-  History,
   LayoutDashboard,
   PlaneTakeoff,
   TableProperties,
@@ -16,48 +15,42 @@ const listSidebar = [
   {
     url: "/dashboard",
     title: "Dashboard",
-    icon: <LayoutDashboard size={18} />,
+    icon: <LayoutDashboard size={18}/>,
     allowedRoles: ["Admin", "Maskapai"],
   },
   {
     url: "/dashboard/users",
     title: "Users",
-    icon: <TableProperties size={18} />,
+    icon: <TableProperties size={18}/>,
     allowedRoles: ["Admin"],
   },
   {
     url: "/dashboard/manage-airlines",
     title: "Airlines",
-    icon: <Fan size={18} />,
+    icon: <Fan size={18}/>,
     allowedRoles: ["Admin"],
   },
   {
     url: "/dashboard/manage-flight",
     title: "Flight",
-    icon: <PlaneTakeoff size={18} />,
+    icon: <PlaneTakeoff size={18}/>,
     allowedRoles: ["Admin", "Maskapai"],
   },
   {
     url: "/dashboard/manage-booking",
     title: "Booking",
-    icon: <Bookmark size={18} />,
+    icon: <Bookmark size={18}/>,
     allowedRoles: ["Admin", "Maskapai"],
   },
   {
     url: "/dashboard/manage-payment",
     title: "Payments",
-    icon: <DollarSign size={18} />,
+    icon: <DollarSign size={18}/>,
     allowedRoles: ["Admin"],
-  },
-  {
-    url: "/dashboard",
-    title: "History",
-    icon: <History size={18} />,
-    allowedRoles: ["Admin", "Maskapai"],
   },
 ];
 
-const Sidebar: React.FC<{ user?: USER | null }> = ({ user }) => {
+const Sidebar: React.FC<{ user?: USER | null }> = ({user}) => {
   return (
     <div className="w-64 min-h-screen p-4 border">
       <div className="flex items-center mb-4">

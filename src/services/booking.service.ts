@@ -205,6 +205,9 @@ const bookingServices = {
         where: {
           uuid: body.flightId,
         },
+        include: {
+          airlines: true
+        }
       });
 
       if (!searchFlights)
@@ -237,6 +240,12 @@ const bookingServices = {
           total_harga: data.total_harga,
         },
       });
+
+      await prisma_connection.bookingActivity.create({
+        data: {
+          message: `${user.name} melakukan pemesanan ${data.jumlah_kursi} kursi untuk penerbangan ${searchFlights.airlines.name} dengan total harga Rp. ${data.total_harga.toLocaleString("id-ID")}`,
+        }
+      })
 
       return {
         statusCode: 201,

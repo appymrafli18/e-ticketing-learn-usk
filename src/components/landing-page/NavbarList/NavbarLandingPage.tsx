@@ -1,14 +1,14 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import React, {useCallback, useEffect, useState} from "react";
+import {Menu, X} from "lucide-react";
 import axios from "axios";
-import { ErrorAxios } from "@/lib/axios-error";
+import {ErrorAxios} from "@/lib/axios-error";
 import Link from "next/link";
 import useMe from "@/store/me";
 
 const NavbarLandingPage = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, setUser } = useMe();
+  const {user, setUser} = useMe();
 
   const checkLogin = useCallback(() => {
     if (!user) {
@@ -92,7 +92,7 @@ const NavbarLandingPage = () => {
           className="md:hidden text-white focus:outline-none"
           onClick={() => setIsOpen(!isOpen)}
         >
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
+          {isOpen ? <X size={28}/> : <Menu size={28}/>}
         </button>
       </div>
 
@@ -127,7 +127,7 @@ const NavbarLandingPage = () => {
             <>
               <Link
                 href="/suclog/my-tickets"
-                className="text-white border border-white px-2 py-1 hover:bg-white hover:text-black rounded border-transparent transition-all duration-300 flex items-center justify-center"
+                className="text-white border w-full border-white px-2 py-1 hover:bg-white hover:text-black rounded border-transparent transition-all duration-300 flex items-center justify-center"
               >
                 My Tickets
               </Link>
