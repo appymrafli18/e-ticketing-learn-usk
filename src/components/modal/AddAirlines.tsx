@@ -122,7 +122,7 @@ export default function AddAirlines({
                 onChange={handleChange}
                 inputStyle="w-full"
                 placeholder="Masukkan Nama Airlines"
-                required
+                // required
                 type="file"
               />
               {user && user.role === "Admin" && (
